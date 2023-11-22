@@ -5,8 +5,12 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
+let grid = [];
 let direction = [1,1];
-let player, merchant, farmer;
+let farmCellSize, player, merchant, farmer; 
+
+const FARMCELLW = 50;
+const FARMCELLH = 40;
 
 function preload(){
   farmer = loadImage("Farmer.png");
@@ -14,6 +18,8 @@ function preload(){
 }
 
 function setup() {
+  farmCellSize = width/FARMCELLW;
+  createEmptyGrid(grid,FARMCELLH,FARMCELLW);
   createCanvas(windowWidth, windowHeight);
   player = new Player(width/2, height/2, farmer);
 }
@@ -24,6 +30,7 @@ function draw() {
   player.display();
   player.moveCharacter();
   rect(100,100,100,100);
+  displayGrid()
   
 }
 
@@ -78,7 +85,30 @@ class Player{
 }
 
 function backdrop(){
-  imageMode(TOP);
+  imageMode(CORNER);
   image(merchant, width / 16*14,0, 100,100);
 }
- 
+
+function createEmptyGrid(grid,cols, rows){
+  for (let y = 0; y < cols; y++){
+    grid.push([]);
+    for (let x = 0; x < rows; x++){
+      grid[y].push(0);
+    }
+  }
+}
+
+function displayGrid(grid,x,y,color,theImage,cellSize){
+  for(y = 0; y < grid.length; y++){
+    for (x = 0 < grid[y].length; x++){
+      //if thing isnt an image display it with color and rect
+      if(theImage = false){
+        fill(color);
+        rect(x*cellSize,y*cellSize,cellSize,cellSize);
+      }
+      else{
+        image(theImage,x*cellSize,y*cellSize,cellSize,cellSize);
+      }
+    }
+  }
+}
