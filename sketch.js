@@ -8,10 +8,10 @@
 //making variables
 let FarmGrid = [];
 let direction = [1,1];
-let grass, farmCellSize, player, merchant, farmer; 
+let farmCellH, grass, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
-const FARMCELLH = 20;
+const FARMCELLH = 10;
 
 //turning images and sounds into variabes
 function preload(){
@@ -24,7 +24,7 @@ function preload(){
 function setup() {
   createCanvas(windowWidth, windowHeight);
   farmCellSize = width/FARMCELLW;
-  createEmptyGrid(FarmGrid,FARMCELLH,FARMCELLW);
+  createEmptyFarmGrid(FarmGrid,FARMCELLH,FARMCELLW);
   player = new Player(width/2, height/2, farmer);
 }
 
@@ -33,7 +33,7 @@ function setup() {
 function draw() {
   background(220);
   backdrop();
-  displayFarmGrid(FarmGrid,0,height/2,"red",grass,farmCellSize);
+  displayFarmGrid(FarmGrid,0,height - FARMCELLH * farmCellSize,farmCellSize);
   player.display();
   player.moveCharacter();
   rect(100,100,100,100);
@@ -103,7 +103,7 @@ function backdrop(){
 }
 
 //creating any empty grid by putting in the grid im changing and how many squares left and right
-function createEmptyGrid(grid,cols, rows){
+function createEmptyGrid(grid,cols,rows){
   for (let y = 0; y < cols; y++){
     grid.push([]);
     for (let x = 0; x < rows; x++){
@@ -112,18 +112,34 @@ function createEmptyGrid(grid,cols, rows){
   }
 }
 
+function createEmptyFarmGrid(grid,cols,rows){
+  for (let y = 0; y < cols; y++){
+    grid.push([]);
+    for (let x = 0; x < rows; x++){
+      grid[y].push([0,0,0]);
+    }
+  }
+}
+
+
+
+
 //displaying the farm plots 
-function displayFarmGrid(grid,theX,theY,color,theImage,cellSize){
+function displayFarmGrid(grid,theX,theY,cellSize){
   for(let y = 0; y < grid.length; y++){
     for (let x = 0; x < grid[y].length; x++){
-      //if thing isnt an image display it with color and rect
-      if(theImage === false){
-        fill(color);
-        rect(x*cellSize + theX,y*cellSize + theY,cellSize,cellSize);
+      //normal grass
+      if (grid[y][x][0] === 0){ //zero in zero position means its just normal grass
+        image(grass,x*cellSize + theX,y*cellSize + theY,cellSize,cellSize);
       }
-      else{
-        image(theImage,x*cellSize + theX,y*cellSize + theY,cellSize,cellSize);
-        
+      if (grid[y][x][0] === 1){ //one in the first position means tilled
+        image(grass,x*cellSize + theX,y*cellSize + theY,cellSize,cellSize);
+      }
+      if (grid[y][x][1] === 1){ //one in the 1 position means its watered
+        image(grass,x*cellSize + theX,y*cellSize + theY,cellSize,cellSize);
+      }
+      if (grid[y][x][2] === 1){ //one in the 2 position means seeded
+        image(grass,x*cellSize + theX,y*cellSize + theY,cellSize,cellSize);
       }
     }
   }
