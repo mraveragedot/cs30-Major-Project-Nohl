@@ -6,9 +6,9 @@
 // - describe what you did to take this project "above and beyond"
 
 //making variables
-let FarmGrid = [];
+let farmGrid = [];
 let direction = [1,1];
-let farmCellH, grass, farmCellSize, player, merchant, farmer; 
+let soil, wateredSoil, carrotSeeds ,carrot, grass, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
 const FARMCELLH = 10;
@@ -18,13 +18,17 @@ function preload(){
   farmer = loadImage("Farmer.png");
   merchant = loadImage("merchant.png");
   grass = loadImage("Grass.png");
+  soil = loadImage("soil.png");
+  wateredSoil = loadImage("watered-soil.png");
+  carrotSeeds = loadImage("carrot-seeds.png");
+  carrot =loadImage("carrot.png");
 }
 
 //creating cell sizes and grides for farming plots
 function setup() {
   createCanvas(windowWidth, windowHeight);
   farmCellSize = width/FARMCELLW;
-  createEmptyFarmGrid(FarmGrid,FARMCELLH,FARMCELLW);
+  createEmptyFarmGrid(farmGrid,FARMCELLH,FARMCELLW);
   player = new Player(width/2, height/2, farmer);
 }
 
@@ -33,7 +37,7 @@ function setup() {
 function draw() {
   background(220);
   backdrop();
-  displayFarmGrid(FarmGrid,0,height - FARMCELLH * farmCellSize,farmCellSize);
+  displayFarmGrid(farmGrid,0,height - FARMCELLH * farmCellSize,farmCellSize);
   player.display();
   player.moveCharacter();
   rect(100,100,100,100);
@@ -72,23 +76,23 @@ class Player{
   moveCharacter(){
     //making it so the image will turn left if walking left and moving character when pressing wasd and checking to make sure 
     //that they dont walk off edge
-    if (keyIsDown(65) && this.x - this.dx >= 0 + farmer.width/8) { 
+    if (keyIsDown(65) && this.x - this.dx >= 0 + farmer.width/8) {  //left
       this.x -= this.dx;
       direction = [-1,1];
     }
   
-    if (keyIsDown(68) && this.x + this.dx <= width - farmer.width/8) {
+    if (keyIsDown(68) && this.x + this.dx <= width - farmer.width/8) {//right
       this.x += this.dx;
       direction = [1,1];
 
     }
   
-    if (keyIsDown(87) && this.y - this.dy >= 0 + farmer.height/4) {
+    if (keyIsDown(87) && this.y - this.dy >= 0 + farmer.height/4) { //up
       this.y -= this.dy;
 
     }
   
-    if (keyIsDown(83) && this.y + this.dy <= height - farmer.height/4) {
+    if (keyIsDown(83) && this.y + this.dy <= height - farmer.height/4) { //down
       this.y += this.dy;
 
     }
@@ -132,15 +136,21 @@ function displayFarmGrid(grid,theX,theY,cellSize){
       if (grid[y][x][0] === 0){ //zero in zero position means its just normal grass
         image(grass,x*cellSize + theX,y*cellSize + theY,cellSize,cellSize);
       }
-      if (grid[y][x][0] === 1){ //one in the first position means tilled
-        image(grass,x*cellSize + theX,y*cellSize + theY,cellSize,cellSize);
+      else if (grid[y][x][0] === 1){ //one in the zero position means tilled
+        image(soil,x*cellSize + theX,y*cellSize + theY,cellSize,cellSize);
       }
-      if (grid[y][x][1] === 1){ //one in the 1 position means its watered
-        image(grass,x*cellSize + theX,y*cellSize + theY,cellSize,cellSize);
+      else if(grid[y][x][0] === 2){ //two in the zero position means its watered
+        image(wateredSoil,x*cellSize + theX,y*cellSize + theY,cellSize,cellSize);
       }
-      if (grid[y][x][2] === 1){ //one in the 2 position means seeded
-        image(grass,x*cellSize + theX,y*cellSize + theY,cellSize,cellSize);
+      if (grid[y][x][1] === 1){ //one in the one position means carrot seeds
+        image(carrotSeeds,x*cellSize + theX,y*cellSize + theY,cellSize,cellSize);
+      }
+      if (grid[y][x][2] === 1){ // one in the two position means its a grown carrot carrot 
+        image(carrot,x*cellSize + theX,y*cellSize + theY,cellSize,cellSize);
       }
     }
   }
+}
+
+function interactionWithFarm(){
 }
