@@ -41,6 +41,7 @@ function draw() {
   player.display();
   player.moveCharacter();
   rect(100,100,100,100);
+  interactionWithFarm();
   
 }
 
@@ -153,4 +154,9 @@ function displayFarmGrid(grid,theX,theY,cellSize){
 }
 
 function interactionWithFarm(){
+  let y = Math.floor((player.y + farmer.height/8 - (height - FARMCELLH * farmCellSize,farmCellSize)) / farmCellSize );
+  let x = Math.floor((player.x + direction[0]*(farmer.width)) / farmCellSize);
+  circle(player.x, player.y + farmer.height/4, 5);
+
+  console.log(x,y);
 }
