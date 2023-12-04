@@ -41,8 +41,12 @@ function draw() {
   player.display();
   player.moveCharacter();
   rect(100,100,100,100);
-  interactionWithFarm();
+
   
+}
+
+function keyPressed(){
+  interactionWithFarm();
 }
 
 //the player character object 
@@ -52,6 +56,8 @@ class Player{
     this.y = y;
     this.dx = 5;
     this.dy = 5;
+    this.height = farmCellSize;
+    this.width = farmCellSize;
 
     this.myImage = theImage;
   }
@@ -61,14 +67,14 @@ class Player{
     if(direction[0] === 1){
       // if moving right draw image normally
       imageMode(CENTER);
-      image(this.myImage,this.x, this.y, 90, 90);
+      image(this.myImage,this.x, this.y, farmCellSize, farmCellSize);
     }
     else{
       // if walking left or just stopped walking left mirror the image so facing left
       push();
       imageMode(CENTER);
       scale(direction);
-      image(this.myImage, -this.x, this.y, 90, 90);
+      image(this.myImage, -this.x, this.y, farmCellSize, farmCellSize);
       pop();
     }
     imageMode(CORNER);
@@ -77,23 +83,23 @@ class Player{
   moveCharacter(){
     //making it so the image will turn left if walking left and moving character when pressing wasd and checking to make sure 
     //that they dont walk off edge
-    if (keyIsDown(65) && this.x - this.dx >= 0 + farmer.width/8) {  //left
+    if (keyIsDown(65) && this.x - this.dx >= 0 + this.width /2) {  //left
       this.x -= this.dx;
       direction = [-1,1];
     }
   
-    if (keyIsDown(68) && this.x + this.dx <= width - farmer.width/8) {//right
+    if (keyIsDown(68) && this.x + this.dx <= width - this.width /2) {//right
       this.x += this.dx;
       direction = [1,1];
 
     }
   
-    if (keyIsDown(87) && this.y - this.dy >= 0 + farmer.height/4) { //up
+    if (keyIsDown(87) && this.y - this.dy >= 0 + this.height/ 2) { //up
       this.y -= this.dy;
 
     }
   
-    if (keyIsDown(83) && this.y + this.dy <= height - farmer.height/4) { //down
+    if (keyIsDown(83) && this.y + this.dy <= height - this.height / 2) { //down
       this.y += this.dy;
 
     }
@@ -154,10 +160,27 @@ function displayFarmGrid(grid,theX,theY,cellSize){
 }
 
 function interactionWithFarm(){
-  let y = Math.floor((player.y + farmer.height/8 - (height - FARMCELLH * farmCellSize,farmCellSize)) / farmCellSize );
-  let x = Math.floor((player.x + direction[0]*(farmer.width)) / farmCellSize);
-  
-  circle(player.x, player.y + farmer.height/4, 5);
 
-  console.log(x,y);
+  // turning player position into a grid position
+  let offset;
+  let y = Math.floor((player.y + farmer.height/8 - (height - FARMCELLH * farmCellSize,farmCellSize)) / farmCellSize ) - floor(height/farmCellSize - farmGrid.length);
+  if (direction[0] === -1){ // make sure your interaction with the plot your looking
+    offset = -1;
+  }
+  else{
+    offset = 1;
+  }
+  let x = Math.floor(player.x / farmCellSize + offset) - floor(width/farmCellSize - farmGrid[0].length);
+
+  //catching edge cases
+  if (key === " "){
+    if (x > 0 && x < 40 && (y > 0 && y < 10)){
+      farmGrid[y][x][0] = 1;
+      
+    }
+  }
+    
+  // whats happeneing based on tool held
+
+  console.log(y,x);
 }
