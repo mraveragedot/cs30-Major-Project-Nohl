@@ -41,10 +41,10 @@ function draw() {
   player.display();
   player.moveCharacter();
   rect(100,100,100,100);
+  circle(player.x,player.y+player.height/2, 5);
 
   
 }
-
 function keyPressed(){
   interactionWithFarm();
 }
@@ -54,8 +54,8 @@ class Player{
   constructor(x,y,theImage){
     this.x = x;
     this.y = y;
-    this.dx = 5;
-    this.dy = 5;
+    this.dx = 2;
+    this.dy = 2;
     this.height = farmCellSize;
     this.width = farmCellSize;
 
@@ -163,7 +163,7 @@ function interactionWithFarm(){
 
   // turning player position into a grid position
   let offset;
-  let y = Math.floor((player.y + farmer.height/8 - (height - FARMCELLH * farmCellSize,farmCellSize)) / farmCellSize ) - floor(height/farmCellSize - farmGrid.length);
+  let y = Math.floor((player.y - (height - FARMCELLH * farmCellSize,farmCellSize)) / farmCellSize ) - floor(height/farmCellSize - farmGrid.length) + 1;
   if (direction[0] === -1){ // make sure your interaction with the plot your looking
     offset = -1;
   }
@@ -171,16 +171,16 @@ function interactionWithFarm(){
     offset = 1;
   }
   let x = Math.floor(player.x / farmCellSize + offset) - floor(width/farmCellSize - farmGrid[0].length);
-
-  //catching edge cases
+  
   if (key === " "){
-    if (x > 0 && x < 40 && (y > 0 && y < 10)){
+    //catching edge cases
+    if (x >= 0 && x < 40 && (y >= 0 && y < 10)){
       farmGrid[y][x][0] = 1;
       
     }
   }
-    
+  
   // whats happeneing based on tool held
-
+  
   console.log(y,x);
 }
