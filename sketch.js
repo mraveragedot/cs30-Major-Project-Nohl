@@ -6,22 +6,25 @@
 // - describe what you did to take this project "above and beyond"
 
 //making variables
+let hotBar = [];
 let farmGrid = [];
 let direction = [1,1];
-let soil, wateredSoil, carrotSeeds ,carrot, grass, farmCellSize, player, merchant, farmer; 
+let hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
 const FARMCELLH = 10;
 
 //turning images and sounds into variabes
 function preload(){
-  farmer = loadImage("Farmer.png");
-  merchant = loadImage("merchant.png");
-  grass = loadImage("Grass.png");
-  soil = loadImage("soil.png");
-  wateredSoil = loadImage("watered-soil.png");
-  carrotSeeds = loadImage("carrot-seeds.png");
-  carrot =loadImage("carrot.png");
+  wateringCan = loadImage("assets/watering-can.png");
+  hoe = loadImage("assets/hoe.png");
+  farmer = loadImage("assets/Farmer.png");
+  merchant = loadImage("assets/merchant.png");
+  grass = loadImage("assets/Grass.png");
+  soil = loadImage("assets/soil.png");
+  wateredSoil = loadImage("assets/watered-soil.png");
+  carrotSeeds = loadImage("assets/carrot-seeds.png");
+  carrot =loadImage("assets/carrot.png");
 }
 
 //creating cell sizes and grides for farming plots
@@ -30,6 +33,9 @@ function setup() {
   farmCellSize = width/FARMCELLW;
   createEmptyFarmGrid(farmGrid,FARMCELLH,FARMCELLW);
   player = new Player(width/2, height/2, farmer);
+  createEmptyGrid(hotBar,4,1,2);
+  hotBarSize = farmCellSize*2;
+
 }
 
 
@@ -114,11 +120,13 @@ function backdrop(){
 }
 
 //creating any empty grid by putting in the grid im changing and how many squares left and right
-function createEmptyGrid(grid,cols,rows){
+function createEmptyGrid(grid,cols,rows,zeros){
   for (let y = 0; y < cols; y++){
     grid.push([]);
     for (let x = 0; x < rows; x++){
-      grid[y].push(0);
+      for (let z = 0; z < zeros; z++){
+        grid[y].push(0);
+      }
     }
   }
 }
@@ -183,4 +191,12 @@ function interactionWithFarm(){
   // whats happeneing based on tool held
   
   console.log(y,x);
+}
+
+function toolBar(){
+  for (let i = 0; i < hotBar.length; i ++){
+    if(hotBar[0] === 0){
+      
+    }
+  }  
 }
