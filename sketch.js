@@ -9,13 +9,17 @@
 let hotBar = [];
 let farmGrid = [];
 let direction = [1,1];
-let hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
+let holding = 1;
+let emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
 const FARMCELLH = 10;
 
 //turning images and sounds into variabes
 function preload(){
+  theSelect = loadImage("assets/select.png");
+  emptyInventory = loadImage("assets/empty-inventory.png");
+  selected = loadImage("assets/selected.png");
   wateringCan = loadImage("assets/watering-can.png");
   hoe = loadImage("assets/hoe.png");
   farmer = loadImage("assets/Farmer.png");
@@ -44,11 +48,10 @@ function draw() {
   background(220);
   backdrop();
   displayFarmGrid(farmGrid,0,height - FARMCELLH * farmCellSize,farmCellSize);
-  player.display();
+  toolBar();
   player.moveCharacter();
-  rect(100,100,100,100);
+  player.display();
   circle(player.x,player.y+player.height/2, 5);
-
   
 }
 function keyPressed(){
@@ -194,9 +197,32 @@ function interactionWithFarm(){
 }
 
 function toolBar(){
-  for (let i = 0; i < hotBar.length; i ++){
-    if(hotBar[0] === 0){
-      
+  for (let i = 0; i < hotBar.length; i ++){ //displaying what hotbar you aree using
+    if(hotBar[i][0] === 0){
+      image(emptyInventory,0,0 + hotBarSize * i,hotBarSize,hotBarSize);
     }
-  }  
+    else if(hotBar[i][0] === 1){
+      image(selected,0,0 + hotBarSize * i,hotBarSize,hotBarSize);
+    }
+
+    if(hotBar[i][1] === "hoe"){
+      image(hoe,0,0 + hotBarSize * i,hotBarSize,hotBarSize);
+    }
+    if(hotBar[i][1] === "select"){
+      image(theSelect,0,0 + hotBarSize * i,hotBarSize,hotBarSize);
+    }
+    if(hotBar[i][1] === "wateringCan"){
+      image(wateringCan,0,0 + hotBarSize * i,hotBarSize,hotBarSize);
+    }
+  }
+}
+
+function mouseWheel(event) {
+  if(event.delta < 0){
+    holding --;
+  }
+  else{
+    holding ++;
+  }
+  print(event.delta);
 }
