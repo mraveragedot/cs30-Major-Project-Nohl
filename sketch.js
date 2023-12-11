@@ -6,10 +6,11 @@
 // - describe what you did to take this project "above and beyond"
 
 //making variables
+let inventory = [];
 let hotBar = [];
 let farmGrid = [];
 let direction = [1,1];
-let holding = 1;
+let holding = 0;
 let emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
@@ -33,6 +34,7 @@ function preload(){
 
 //creating cell sizes and grides for farming plots
 function setup() {
+  createEmptyGrid(inventory, 5,5,1);
   createCanvas(windowWidth, windowHeight);
   farmCellSize = width/FARMCELLW;
   createEmptyFarmGrid(farmGrid,FARMCELLH,FARMCELLW);
@@ -52,7 +54,6 @@ function draw() {
   player.moveCharacter();
   player.display();
   circle(player.x,player.y+player.height/2, 5);
-  
 }
 function keyPressed(){
   interactionWithFarm();
@@ -143,9 +144,6 @@ function createEmptyFarmGrid(grid,cols,rows){
   }
 }
 
-
-
-
 //displaying the farm plots 
 function displayFarmGrid(grid,theX,theY,cellSize){
   for(let y = 0; y < grid.length; y++){
@@ -186,12 +184,18 @@ function interactionWithFarm(){
   if (key === " "){
     //catching edge cases
     if (x >= 0 && x < 40 && (y >= 0 && y < 10)){
-      farmGrid[y][x][0] = 1;
+      // whats happeneing based on tool held
+      if (hotBar[holding][1] === "hoe" && farmGrid[y][x][0] === 0){
+        farmGrid[y][x][0] = 1;
+      }
+      if (hotBar[holding][1] === "wateringCan" && farmGrid[y][x][0] === 1){
+        farmGrid[y][x][0] = 2;
+      }
+
       
     }
   }
   
-  // whats happeneing based on tool held
   
   console.log(y,x);
 }
@@ -199,7 +203,7 @@ function interactionWithFarm(){
 function toolBar(){
   for (let i = 0; i < hotBar.length; i ++){ //displaying what hotbar you aree using
     if(hotBar[i][0] === 0){
-      image(emptyInventory,0,0 + hotBarSize * i,hotBarSize,hotBarSize);
+      image(emptyInventory,0,0 + hotBarSize * i ,hotBarSize,hotBarSize);
     }
     else if(hotBar[i][0] === 1){
       image(selected,0,0 + hotBarSize * i,hotBarSize,hotBarSize);
@@ -218,11 +222,24 @@ function toolBar(){
 }
 
 function mouseWheel(event) {
-  if(event.delta < 0){
+  if(event.delta < 0){ //scroll wheel go up so does holding
     holding --;
   }
   else{
     holding ++;
   }
+  if(holding > hotBar.length - 1){ //wrapping from top to bottom
+    holding = 0;
+  }
+  else if (holding < 0){ //wrapping bottom to top
+    holding = 3;
+  }
   print(event.delta);
+  print(holding);
+
+  for(let i = 0;i < hotBar.length; i ++){//unselecting all
+    hotBar[i][0] = 0;
+  }
+  hotBar[holding][0] = 1; // selecting the right box
 }
+
