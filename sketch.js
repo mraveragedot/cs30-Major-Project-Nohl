@@ -6,6 +6,7 @@
 // - describe what you did to take this project "above and beyond"
 
 //making variables
+let openInventory = false;
 let inventory = [];
 let hotBar = [];
 let farmGrid = [];
@@ -54,9 +55,17 @@ function draw() {
   player.moveCharacter();
   player.display();
   circle(player.x,player.y+player.height/2, 5);
+
+  if(openInventory){
+    displayInventory();
+  }
 }
 function keyPressed(){
   interactionWithFarm();
+
+  if (key ==="i"){
+    openInventory = true;
+  }
 }
 
 //the player character object 
@@ -243,3 +252,10 @@ function mouseWheel(event) {
   hotBar[holding][0] = 1; // selecting the right box
 }
 
+function displayInventory(){
+  for(let y = 0; y < inventory.length; y++){
+    for (let x = 0; x < inventory[y].length; x++){
+
+    }
+  }
+}
