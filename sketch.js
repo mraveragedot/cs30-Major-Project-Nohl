@@ -7,12 +7,12 @@
 
 //making variables
 let openInventory = false;
-let inventory = [];
+let inventoryGrid = [];
 let hotBar = [];
 let farmGrid = [];
 let direction = [1,1];
 let holding = 0;
-let emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
+let inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
 const FARMCELLH = 10;
@@ -35,13 +35,14 @@ function preload(){
 
 //creating cell sizes and grides for farming plots
 function setup() {
-  createEmptyGrid(inventory, 5,5,1);
+  createEmptyGrid(inventoryGrid, 5,5,1);
   createCanvas(windowWidth, windowHeight);
   farmCellSize = width/FARMCELLW;
   createEmptyFarmGrid(farmGrid,FARMCELLH,FARMCELLW);
   player = new Player(width/2, height/2, farmer);
   createEmptyGrid(hotBar,4,1,2);
   hotBarSize = farmCellSize*2;
+  inventory = new storageGrid(width/2,height/2,farmCellSize*1.5,emptyInventory);
 
 }
 
@@ -56,15 +57,19 @@ function draw() {
   player.display();
   circle(player.x,player.y+player.height/2, 5);
 
-  if(openInventory){
-    displayInventory();
+  if(inventory.shouldDisplay){
+    inventory.display();
   }
 }
 function keyPressed(){
   interactionWithFarm();
 
-  if (key ==="i"){
-    openInventory = true;
+  if (key === "i"){
+    inventory.shouldDisplay = !inventory.shouldDisplay;
+    if(!inventory.shouldDisplay){
+      inventory.x = width/2;
+      inventory.y = height/2;
+    }
   }
 }
 
@@ -252,10 +257,23 @@ function mouseWheel(event) {
   hotBar[holding][0] = 1; // selecting the right box
 }
 
-function displayInventory(){
-  for(let y = 0; y < inventory.length; y++){
-    for (let x = 0; x < inventory[y].length; x++){
-
-    }
+class storageGrid{
+  constructor(x, y, size, theImage, grid){
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.theImage = theImage;
+    this.grid = grid;
+    this.shouldDisplay = false;
   }
+
+  display(){
+    for(let y = 0; y < this.grid.length; y++){
+      for (let x = 0; x < this.grid[y].length; x++){
+        image(this.theImage, this.x + this.size * x ,this.y + this.size * y,this.size,this.size);
+      }
+    }
+  
+  }
+
 }
