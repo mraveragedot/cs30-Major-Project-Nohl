@@ -42,7 +42,7 @@ function setup() {
   player = new Player(width/2, height/2, farmer);
   createEmptyGrid(hotBar,4,1,2);
   hotBarSize = farmCellSize*2;
-  inventory = new storageGrid(width/2,height/2,farmCellSize*1.5,emptyInventory);
+  inventory = new storageGrid(width/2,height/2,farmCellSize*1.5,emptyInventory,inventoryGrid);
 
 }
 
@@ -56,7 +56,7 @@ function draw() {
   player.moveCharacter();
   player.display();
   circle(player.x,player.y+player.height/2, 5);
-
+  inventory.moving();
   if(inventory.shouldDisplay){
     inventory.display();
   }
@@ -265,15 +265,30 @@ class storageGrid{
     this.theImage = theImage;
     this.grid = grid;
     this.shouldDisplay = false;
+
+    this.width = size * grid.length;
+    this.height = -size/5;
   }
 
   display(){
     for(let y = 0; y < this.grid.length; y++){
       for (let x = 0; x < this.grid[y].length; x++){
-        image(this.theImage, this.x + this.size * x ,this.y + this.size * y,this.size,this.size);
+        image(this.theImage, this.x + this.size * x ,this.y + this.size * y,this.size,this.size);//drawing the empty squares
+        rect(this.x,this.y,this.width,this.height); //drawing the white box ontop
       }
     }
-  
   }
 
+  moving(){//making it so you can move inventory 
+    let xOffset = abs(mouseX - width) - abs(this.x - width);
+    let yOffset = abs(mouseY - height) - abs(this.x - height);
+    if (mouseIsPressed && mouseX - this.x < xOffset){
+  
+      this.x = mouseX - xOffset;
+      this.y = mouseY = yOffset;
+
+    }
+    console.log(xOffset, yOffset);
+  }
 }
+
