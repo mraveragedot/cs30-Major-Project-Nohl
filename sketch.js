@@ -12,7 +12,7 @@ let hotBar = [];
 let farmGrid = [];
 let direction = [1,1];
 let holding = 0;
-let inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
+let house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
 const FARMCELLH = 10;
@@ -56,7 +56,9 @@ function draw() {
   player.moveCharacter();
   player.display();
   circle(player.x,player.y+player.height/2, 5);
-  inventory.moving();
+  if(inventory.toggle){
+    inventory.moving();
+  }
   if(inventory.shouldDisplay){
     inventory.display();
   }
@@ -209,9 +211,6 @@ function interactionWithFarm(){
       
     }
   }
-  
-  
-  console.log(y,x);
 }
 
 function toolBar(){
@@ -270,7 +269,7 @@ class storageGrid{
     this.height = -size/5;
     this.xOffset = 0;
     this.yOffset = 0;
-    this.toggle = true;
+    this.toggle = false;
   }
 
   display(){
@@ -283,22 +282,23 @@ class storageGrid{
   }
 
   moving(){//making it so you can move inventory 
-    if (inventory.shouldDisplay && this.toggle && (mouseX - this.x > 0 && mouseX - this.x < this.width) && (mouseY - this.y < 0 && mouseY - this.y > this.height)){//makes offset only once
-      console.log(mouseX - inventory.x, mouseY - inventory.y);
-      inventory.xOffset = mouseX - inventory.x;
-      inventory.yOffset = mouseY - inventory.y;  
-      console.log("stuff?");
-    }
-    if (mouseIsPressed && inventory.shouldDisplay ){
-      this.toggle = false;
+    if (mouseIsPressed){
       this.x = mouseX - this.xOffset;
       this.y = mouseY - this.yOffset;
 
-      console.log(this.xOffset, this.yOffset);
-      console.log(mouseX);
     }
     if(!mouseIsPressed){
-      this.toggle = true;
+      this.toggle = false;
     }
   }
+}
+
+function mousePressed(){
+  if (inventory.shouldDisplay && (mouseX - inventory.x > 0 && mouseX - inventory.x < inventory.width) && (mouseY - inventory.y < 0 && mouseY - inventory.y > inventory.height)){//makes offset only once
+    inventory.xOffset = mouseX - inventory.x;
+    inventory.yOffset = mouseY - inventory.y;  
+
+    inventory.toggle = true;
+  }
+
 }
