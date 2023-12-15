@@ -270,7 +270,7 @@ class storageGrid{
     this.height = -size/5;
     this.xOffset = 0;
     this.yOffset = 0;
-    this.fuck = true;
+    this.toggle = true;
   }
 
   display(){
@@ -283,27 +283,22 @@ class storageGrid{
   }
 
   moving(){//making it so you can move inventory 
-    if (this.fuck){
-      console.log(mouseX - inventory.x, mouseY - inventory.y)
+    if (inventory.shouldDisplay && this.toggle && (mouseX - this.x > 0 && mouseX - this.x < this.width) && (mouseY - this.y < 0 && mouseY - this.y > this.height)){//makes offset only once
+      console.log(mouseX - inventory.x, mouseY - inventory.y);
       inventory.xOffset = mouseX - inventory.x;
       inventory.yOffset = mouseY - inventory.y;  
+      console.log("stuff?");
     }
-    if (mouseIsPressed && inventory.shouldDisplay){
-      this.fuck = false
+    if (mouseIsPressed && inventory.shouldDisplay ){
+      this.toggle = false;
       this.x = mouseX - this.xOffset;
       this.y = mouseY - this.yOffset;
 
       console.log(this.xOffset, this.yOffset);
-      console.log(mouseX)
+      console.log(mouseX);
     }
     if(!mouseIsPressed){
-      this.fuck = true;
+      this.toggle = true;
     }
-  }
-}
-
-function mouseClicked(){
-  if(inventory.shouldDisplay){
-    
   }
 }
