@@ -268,8 +268,9 @@ class storageGrid{
 
     this.width = size * grid.length;
     this.height = -size/5;
-    this.xOffset = 0
-    this.yOffset = 0
+    this.xOffset = 0;
+    this.yOffset = 0;
+    this.fuck = true;
   }
 
   display(){
@@ -282,22 +283,27 @@ class storageGrid{
   }
 
   moving(){//making it so you can move inventory 
-    
-    if (mouseIsPressed && inventory.shouldDisplay){
-  
-      this.x = mouseX + this.xOffset;
-      this.y = mouseY + this.yOffset;
-
+    if (this.fuck){
+      console.log(mouseX - inventory.x, mouseY - inventory.y)
+      inventory.xOffset = mouseX - inventory.x;
+      inventory.yOffset = mouseY - inventory.y;  
     }
-    // console.log(this.xOffset, this.yOffset);
+    if (mouseIsPressed && inventory.shouldDisplay){
+      this.fuck = false
+      this.x = mouseX - this.xOffset;
+      this.y = mouseY - this.yOffset;
+
+      console.log(this.xOffset, this.yOffset);
+      console.log(mouseX)
+    }
+    if(!mouseIsPressed){
+      this.fuck = true;
+    }
   }
 }
 
 function mouseClicked(){
   if(inventory.shouldDisplay){
-    inventory.xOffset = mouseX - inventory.x;
-    inventory.yOffset = mouseY - inventory.y;
-    console.log(mouseX - inventory.x, mouseY - inventory.y)
     
   }
 }
