@@ -6,13 +6,14 @@
 // - describe what you did to take this project "above and beyond"
 
 //making variables
+let items = [];
 let openInventory = false;
 let inventoryGrid = [];
 let hotBar = [];
 let farmGrid = [];
 let direction = [1,1];
 let holding = 0;
-let house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
+let mouseHolding, house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
 const FARMCELLH = 10;
@@ -35,6 +36,7 @@ function preload(){
 
 //creating cell sizes and grides for farming plots
 function setup() {
+  items = [["hoe", hoe],["carrotSeeds", carrotSeeds], ["wateringCan", wateringCan]];
   createEmptyGrid(inventoryGrid, 5,5,1);
   createCanvas(windowWidth, windowHeight);
   farmCellSize = width/FARMCELLW;
@@ -43,7 +45,7 @@ function setup() {
   createEmptyGrid(hotBar,4,1,2);
   hotBarSize = farmCellSize*2;
   inventory = new storageGrid(width/2,height/2,farmCellSize*1.5,emptyInventory,inventoryGrid);
-
+  hotBar[0][1] = "select";
 }
 
 
@@ -61,6 +63,7 @@ function draw() {
   }
   if(inventory.shouldDisplay){
     inventory.display();
+    inventory.itemDisplay();
   }
 }
 function keyPressed(){
@@ -291,14 +294,29 @@ class storageGrid{
       this.toggle = false;
     }
   }
+
+  itemDisplay(){
+    // console.log(this.grid);
+    for(let y = 0; y < this.grid.length; y ++){
+      for (let x = 0; x < this.grid[y].length; x++){
+        for(let thing of items){
+          if(this.grid[y][x] === thing[0]){
+            image(thing[1], this.x + this.size * x, this.y + this.size * y, this.size, this.size);
+          }
+        }
+      }
+    }
+  }
 }
 
 function mousePressed(){
   if (inventory.shouldDisplay && (mouseX - inventory.x > 0 && mouseX - inventory.x < inventory.width) && (mouseY - inventory.y < 0 && mouseY - inventory.y > inventory.height)){//makes offset only once
-    inventory.xOffset = mouseX - inventory.x;
+    inventory.xOffset = mouseX - inventory.x; //if mouse is pressed in the inventory box set offset and toggle the movement on 
     inventory.yOffset = mouseY - inventory.y;  
 
     inventory.toggle = true;
   }
+
+  
 
 }
