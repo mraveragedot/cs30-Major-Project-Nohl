@@ -13,7 +13,8 @@ let hotBar = [];
 let farmGrid = [];
 let direction = [1,1];
 let holding = 0;
-let mouseHolding, house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
+let mouseHolding = "";
+let house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
 const FARMCELLH = 10;
@@ -65,6 +66,7 @@ function draw() {
     inventory.display();
     inventory.itemDisplay();
   }
+  inventory.mouseItemDisplay();
 }
 function keyPressed(){
   interactionWithFarm();
@@ -295,8 +297,7 @@ class storageGrid{
     }
   }
 
-  itemDisplay(){
-    // console.log(this.grid);
+  itemDisplay(){ // displaying items in the grid 
     for(let y = 0; y < this.grid.length; y ++){
       for (let x = 0; x < this.grid[y].length; x++){
         for(let thing of items){
@@ -306,6 +307,32 @@ class storageGrid{
         }
       }
     }
+  }
+
+  mouseItemDisplay(){
+    imageMode(CENTER);
+    if (mouseHolding !== ""){
+      for(let thing of items){
+        if(mouseHolding === thing[0]){
+          image(thing[1],mouseX,mouseY, this.size, this.size);
+        }
+      }
+    }
+
+    imageMode(CORNER);
+  }
+
+  movingItems(){
+    let x = floor((mouseX - this.x) / this.size);
+    let y = floor((mouseY - this.y) / this.size);
+
+    if(x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length && mouseHolding === "" && this.grid[y][x] !== 0){
+      mouseHolding = this.grid[y][x];
+      this.grid[y][x] = 0;
+      console.log(this.grid[y][x]);
+    }
+    console.log(x,y);
+
   }
 }
 
@@ -317,6 +344,7 @@ function mousePressed(){
     inventory.toggle = true;
   }
 
-  
+  inventory.movingItems();
 
 }
+
