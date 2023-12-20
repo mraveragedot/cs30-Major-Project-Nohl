@@ -47,6 +47,7 @@ function setup() {
   hotBarSize = farmCellSize*2;
   inventory = new storageGrid(width/2,height/2,farmCellSize*1.5,emptyInventory,inventoryGrid);
   hotBar[0][1] = "select";
+  inventory.grid[0][0] = "hoe";
 }
 
 
@@ -213,20 +214,18 @@ function interactionWithFarm(){
         farmGrid[y][x][0] = 2;
       }
 
-      
     }
   }
 }
 
 function toolBar(){
-  for (let i = 0; i < hotBar.length; i ++){ //displaying what hotbar you aree using
+  for (let i = 0; i < hotBar.length; i ++){ //displaying what hotbar you are using
     if(hotBar[i][0] === 0){
       image(emptyInventory,0,0 + hotBarSize * i ,hotBarSize,hotBarSize);
     }
     else if(hotBar[i][0] === 1){
       image(selected,0,0 + hotBarSize * i,hotBarSize,hotBarSize);
     }
-
     if(hotBar[i][1] === "hoe"){
       image(hoe,0,0 + hotBarSize * i,hotBarSize,hotBarSize);
     }
@@ -237,7 +236,25 @@ function toolBar(){
       image(wateringCan,0,0 + hotBarSize * i,hotBarSize,hotBarSize);
     }
   }
+
 }
+
+function movingToolBarItems(){
+  let x = floor(mouseX / hotBarSize);
+  let y = floor(mouseY/ hotBarSize);
+
+  if(x >= 0 && x < 1 && y >= 0 && y < hotBar.length && mouseHolding === "" && hotBar[y][x][1] !== 0){
+    mouseHolding = hotBar[y][x][1];
+    hotBar[y][x][1] = 0;
+    console.log(hotBar[y][x]);
+  }
+  else if (x >= 0 && x < 1 && y >= 0 && y < hotBar.length){
+    hotBar[y][x][1] = mouseHolding;
+    mouseHolding = "";
+  }
+  console.log(x,y);
+}
+
 
 function mouseWheel(event) {
   if(event.delta < 0){ //scroll wheel go up so does holding
@@ -331,6 +348,10 @@ class storageGrid{
       this.grid[y][x] = 0;
       console.log(this.grid[y][x]);
     }
+    else if (x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length){
+      this.grid[y][x] = mouseHolding;
+      mouseHolding = "";
+    }
     console.log(x,y);
 
   }
@@ -345,6 +366,7 @@ function mousePressed(){
   }
 
   inventory.movingItems();
+  movingToolBarItems();
+
 
 }
-
