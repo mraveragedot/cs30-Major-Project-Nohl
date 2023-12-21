@@ -47,7 +47,8 @@ function setup() {
   hotBarSize = farmCellSize*2;
   inventory = new storageGrid(width/2,height/2,farmCellSize*1.5,emptyInventory,inventoryGrid);
   hotBar[0][1] = "select";
-  inventory.grid[0][0] = "hoe";
+  hotBar[1][1] = "hoe";
+  hotBar[2][1] = "wateringCan";
 }
 
 
@@ -241,18 +242,19 @@ function toolBar(){
 
 function movingToolBarItems(){
   let x = floor(mouseX / hotBarSize);
-  let y = floor(mouseY/ hotBarSize);
+  let y = floor(mouseY / hotBarSize);
+  if(x >= 0 && x < 1 && y >= 0 && y < hotBar.length && mouseHolding === "" && hotBar[y][1] !== 0 && hotBar[y][1] !== "select"){ // picking up somehting from hotBar
+    console.log("grabbing");
+    mouseHolding = hotBar[y][1];
+    hotBar[y][1] = 0;
+    console.log(mouseHolding);
 
-  if(x >= 0 && x < 1 && y >= 0 && y < hotBar.length && mouseHolding === "" && hotBar[y][x][1] !== 0){
-    mouseHolding = hotBar[y][x][1];
-    hotBar[y][x][1] = 0;
-    console.log(hotBar[y][x]);
   }
-  else if (x >= 0 && x < 1 && y >= 0 && y < hotBar.length){
-    hotBar[y][x][1] = mouseHolding;
+  else if (x >= 0 && x < 1 && y >= 0 && y < hotBar.length && hotBar[y][1] !== "select"){// putting soemthing down into hotbar
+    hotBar[y][1] = mouseHolding;
     mouseHolding = "";
+    console.log(mouseHolding);
   }
-  console.log(x,y);
 }
 
 
@@ -343,17 +345,17 @@ class storageGrid{
     let x = floor((mouseX - this.x) / this.size);
     let y = floor((mouseY - this.y) / this.size);
 
-    if(x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length && mouseHolding === "" && this.grid[y][x] !== 0){
+    if(this.shouldDisplay && x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length && mouseHolding === "" && this.grid[y][x] !== 0){
       mouseHolding = this.grid[y][x];
       this.grid[y][x] = 0;
-      console.log(this.grid[y][x]);
     }
-    else if (x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length){
+    else if (this.shouldDisplay && x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length){
       this.grid[y][x] = mouseHolding;
       mouseHolding = "";
     }
-    console.log(x,y);
-
+    else{
+      movingToolBarItems();
+    }
   }
 }
 
@@ -366,7 +368,5 @@ function mousePressed(){
   }
 
   inventory.movingItems();
-  movingToolBarItems();
-
 
 }
