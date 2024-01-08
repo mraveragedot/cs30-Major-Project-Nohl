@@ -14,13 +14,14 @@ let farmGrid = [];
 let direction = [1,1];
 let holding = 0;
 let mouseHolding = "";
-let house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
+let House, playerMoving, house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
 const FARMCELLH = 10;
 
 //turning images and sounds into variabes
 function preload(){
+  house = loadImage("assets/house.png");
   theSelect = loadImage("assets/select.png");
   emptyInventory = loadImage("assets/empty-inventory.png");
   selected = loadImage("assets/selected.png");
@@ -49,6 +50,7 @@ function setup() {
   hotBar[0][1] = "select";
   hotBar[1][1] = "hoe";
   hotBar[2][1] = "wateringCan";
+  House = new Building(width/2 - 50,0,house,100, 100);
 }
 
 
@@ -60,7 +62,7 @@ function draw() {
   toolBar();
   player.moveCharacter();
   player.display();
-  circle(player.x,player.y+player.height/2, 5);
+  circle(player.x,player.y, 5);
   if(inventory.toggle){
     inventory.moving();
   }
@@ -69,7 +71,10 @@ function draw() {
     inventory.itemDisplay();
   }
   inventory.mouseItemDisplay();
-}
+  House.hitbox();
+  House.display();
+}  
+
 function keyPressed(){
   interactionWithFarm();
 
@@ -80,6 +85,39 @@ function keyPressed(){
       inventory.y = height/2;
     }
   }
+}
+
+class Building{
+  constructor(x, y, theImage, width, height){
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.theImage = theImage;
+
+  }
+
+  display(){
+    image(this.theImage,this.x, this.y, this.width, this.width);
+  }
+
+  hitbox(){
+    console.log(player.moving === "right" && player.x < this.x);
+    if (player.moving === "right" && player.x < this.x && player.dx + player.x > this.x && player.y < this.y + this.height){
+      player.x - player.dx;
+    }
+
+    if (player.moving === "left" && player.x > this.x + this.width && player.x - player.dx < this.x + this.width && player.y < this.y + this.height){
+      player.x + player.dx;
+    }
+
+    if (player.moving === "up" && player.y < this.y + player.height && player.x > this.x && player.x < this.x + this.width && player.y > this.y + this.height && player.y + player.dx < this.y + this.height){
+      player.y + player.dy;
+    }
+
+
+  }
+
 }
 
 //the player character object 
@@ -93,6 +131,7 @@ class Player{
     this.width = farmCellSize;
 
     this.myImage = theImage;
+    this.moving = playerMoving;
   }
 
   display(){
@@ -119,22 +158,26 @@ class Player{
     if (keyIsDown(65) && this.x - this.dx >= 0 + this.width /2) {  //left
       this.x -= this.dx;
       direction = [-1,1];
+      this.moving = "left";
     }
   
     if (keyIsDown(68) && this.x + this.dx <= width - this.width /2) {//right
       this.x += this.dx;
       direction = [1,1];
-
+      this.moving = "right";
     }
   
     if (keyIsDown(87) && this.y - this.dy >= 0 + this.height/ 2) { //up
       this.y -= this.dy;
-
+      this.moving = "up";
     }
   
     if (keyIsDown(83) && this.y + this.dy <= height - this.height / 2) { //down
       this.y += this.dy;
-
+      this.moving = "down";
+    }
+    else{
+      this.moving = "still";
     }
 
   }
@@ -328,7 +371,7 @@ class storageGrid{
     }
   }
 
-  mouseItemDisplay(){
+  mouseItemDisplay(){ //if holding item print it at the mouse location
     imageMode(CENTER);
     if (mouseHolding !== ""){
       for(let thing of items){
@@ -345,10 +388,12 @@ class storageGrid{
     let x = floor((mouseX - this.x) / this.size);
     let y = floor((mouseY - this.y) / this.size);
 
+    //if not holding somthing after clicked mouse pick it up 
     if(this.shouldDisplay && x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length && mouseHolding === "" && this.grid[y][x] !== 0){
       mouseHolding = this.grid[y][x];
       this.grid[y][x] = 0;
     }
+    //if holding something put it down
     else if (this.shouldDisplay && x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length){
       this.grid[y][x] = mouseHolding;
       mouseHolding = "";
