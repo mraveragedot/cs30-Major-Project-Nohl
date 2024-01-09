@@ -14,7 +14,8 @@ let farmGrid = [];
 let direction = [1,1];
 let holding = 0;
 let mouseHolding = "";
-let House, playerMoving, house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
+let shouldMove = true;
+let theHouse, playerMoving, house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
 const FARMCELLH = 10;
@@ -50,7 +51,7 @@ function setup() {
   hotBar[0][1] = "select";
   hotBar[1][1] = "hoe";
   hotBar[2][1] = "wateringCan";
-  House = new Building(width/2 - 50,0,house,100, 100);
+  theHouse = new Building(width/2 - 50,0,house,100, 100);
 }
 
 
@@ -60,6 +61,7 @@ function draw() {
   backdrop();
   displayFarmGrid(farmGrid,0,height - FARMCELLH * farmCellSize,farmCellSize);
   toolBar();
+  theHouse.hitbox();
   player.moveCharacter();
   player.display();
   circle(player.x,player.y, 5);
@@ -71,8 +73,7 @@ function draw() {
     inventory.itemDisplay();
   }
   inventory.mouseItemDisplay();
-  House.hitbox();
-  House.display();
+  theHouse.display();
 }  
 
 function keyPressed(){
@@ -102,17 +103,22 @@ class Building{
   }
 
   hitbox(){
-    console.log(player.moving === "right" && player.x < this.x);
-    if (player.moving === "right" && player.x < this.x && player.dx + player.x > this.x && player.y < this.y + this.height){
-      player.x - player.dx;
+    //console.log(shouldMove);
+    console.log(player.moving === "right" && player.x < this.x && player.dx * 2 + player.x > this.x && player.y < this.y + this.height);
+    if (player.moving === "right" && player.x < this.x && player.dx * 2 + player.x > this.x && player.y < this.y + this.height){
+      shouldMove = false;
+      console.log("here");
     }
 
-    if (player.moving === "left" && player.x > this.x + this.width && player.x - player.dx < this.x + this.width && player.y < this.y + this.height){
-      player.x + player.dx;
+    else if (player.moving === "left" && player.x > this.x + this.width && player.x - player.dx *2 < this.x + this.width && player.y < this.y + this.height){
+      shouldMove = false;
     }
 
-    if (player.moving === "up" && player.y < this.y + player.height && player.x > this.x && player.x < this.x + this.width && player.y > this.y + this.height && player.y + player.dx < this.y + this.height){
-      player.y + player.dy;
+    else if (player.moving === "up" && player.y < this.y + player.height && player.x > this.x && player.x < this.x + this.width && player.y > this.y + this.height && player.y + player.dy *2 < this.y + this.height){
+      shouldMove = false;
+    }
+    else{
+      shouldMove = true;
     }
 
 
@@ -155,31 +161,29 @@ class Player{
   moveCharacter(){
     //making it so the image will turn left if walking left and moving character when pressing wasd and checking to make sure 
     //that they dont walk off edge
-    if (keyIsDown(65) && this.x - this.dx >= 0 + this.width /2) {  //left
+    if (keyIsDown(65) && this.x - this.dx >= 0 + this.width /2 && shouldMove) {  //left
       this.x -= this.dx;
       direction = [-1,1];
       this.moving = "left";
     }
   
-    if (keyIsDown(68) && this.x + this.dx <= width - this.width /2) {//right
+    if (keyIsDown(68) && this.x + this.dx <= width - this.width /2 && shouldMove) {//right
       this.x += this.dx;
       direction = [1,1];
       this.moving = "right";
     }
   
-    if (keyIsDown(87) && this.y - this.dy >= 0 + this.height/ 2) { //up
+    if (keyIsDown(87) && this.y - this.dy >= 0 + this.height/ 2 && shouldMove) { //up
       this.y -= this.dy;
       this.moving = "up";
     }
-  
-    if (keyIsDown(83) && this.y + this.dy <= height - this.height / 2) { //down
+    if (keyIsDown(83) && this.y + this.dy <= height - this.height / 2 && shouldMove) { //down
       this.y += this.dy;
       this.moving = "down";
     }
-    else{
+    if(!keyIsDown(65) && !keyIsDown(68) && !keyIsDown(87) && !keyIsDown(83)){
       this.moving = "still";
     }
-
   }
 }
 
