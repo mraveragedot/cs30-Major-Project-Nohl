@@ -7,7 +7,11 @@
 
 //making variables
 let items = [];
-let openInventory = false;
+let openInventory = [false, true];
+let playerUp = [false, true];
+let playerLeft = [false, true];
+let playerRight  = [false, true];
+let playerDown = [false, true];
 let inventoryGrid = [];
 let hotBar = [];
 let farmGrid = [];
@@ -15,7 +19,7 @@ let direction = [1,1];
 let holding = 0;
 let mouseHolding = "";
 let shouldMove = true;
-let theHouse, playerMoving, house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
+let theHouse, house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
 const FARMCELLH = 10;
@@ -104,21 +108,18 @@ class Building{
 
   hitbox(){
     //console.log(shouldMove);
-    console.log(player.moving === "right" && player.x < this.x && player.dx * 2 + player.x > this.x && player.y < this.y + this.height);
-    if (player.moving === "right" && player.x < this.x && player.dx * 2 + player.x > this.x && player.y < this.y + this.height){
-      shouldMove = false;
+    console.log(playerRight[0] && player.x < this.x && player.dx * 2 + player.x > this.x && player.y < this.y + this.height);
+    if (playerRight[0] && player.x < this.x && player.dx * 2 + player.x > this.x && player.y < this.y + this.height){
+      playerRight[1] = false;
       console.log("here");
     }
 
-    else if (player.moving === "left" && player.x > this.x + this.width && player.x - player.dx *2 < this.x + this.width && player.y < this.y + this.height){
-      shouldMove = false;
+    else if (playerLeft[0] && player.x > this.x + this.width && player.x - player.dx *2 < this.x + this.width && player.y < this.y + this.height){
+      playerLeft[1] = false;
     }
 
-    else if (player.moving === "up" && player.y < this.y + player.height && player.x > this.x && player.x < this.x + this.width && player.y > this.y + this.height && player.y + player.dy *2 < this.y + this.height){
-      shouldMove = false;
-    }
-    else{
-      shouldMove = true;
+    else if (playerUp[0] === "up" && player.y < this.y + player.height && player.x > this.x && player.x < this.x + this.width && player.y > this.y + this.height && player.y + player.dy *2 < this.y + this.height){
+      playerUp[1] = false;
     }
 
 
@@ -137,7 +138,6 @@ class Player{
     this.width = farmCellSize;
 
     this.myImage = theImage;
-    this.moving = playerMoving;
   }
 
   display(){
@@ -161,29 +161,45 @@ class Player{
   moveCharacter(){
     //making it so the image will turn left if walking left and moving character when pressing wasd and checking to make sure 
     //that they dont walk off edge
-    if (keyIsDown(65) && this.x - this.dx >= 0 + this.width /2 && shouldMove) {  //left
+    if (keyIsDown(65) && this.x - this.dx >= 0 + this.width /2 && playerLeft[1]) {  //left
       this.x -= this.dx;
       direction = [-1,1];
-      this.moving = "left";
+      playerLeft[0] = true;
+      playerRight[1] = true;
+    }
+    else{
+      playerLeft[0] = false;
     }
   
-    if (keyIsDown(68) && this.x + this.dx <= width - this.width /2 && shouldMove) {//right
+    if (keyIsDown(68) && this.x + this.dx <= width - this.width /2 && playerRight[1]) {//right
       this.x += this.dx;
       direction = [1,1];
-      this.moving = "right";
+      playerRight[0] = true;
+      playerLeft[1] = true;
     }
+    else{
+      playerRight[0] = false;
+    }
+
   
-    if (keyIsDown(87) && this.y - this.dy >= 0 + this.height/ 2 && shouldMove) { //up
+    if (keyIsDown(87) && this.y - this.dy >= 0 + this.height/ 2 && playerUp[1]) { //up
       this.y -= this.dy;
-      this.moving = "up";
+      playerUp[0] = true;
+      playerDown[1] = true;
     }
-    if (keyIsDown(83) && this.y + this.dy <= height - this.height / 2 && shouldMove) { //down
+    else{
+      playerUp[0] = false;
+    }
+
+    if (keyIsDown(83) && this.y + this.dy <= height - this.height / 2 && playerDown[1]) { //down
       this.y += this.dy;
-      this.moving = "down";
+      playerDown[0] = true;
+      playerUp[1] = true;
     }
-    if(!keyIsDown(65) && !keyIsDown(68) && !keyIsDown(87) && !keyIsDown(83)){
-      this.moving = "still";
+    else{
+      playerDown[0] = false;
     }
+
   }
 }
 
