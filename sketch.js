@@ -8,10 +8,6 @@
 //making variables
 let items = [];
 let openInventory = [false, true];
-let playerUp = [false, true];
-let playerLeft = [false, true];
-let playerRight  = [false, true];
-let playerDown = [false, true];
 let inventoryGrid = [];
 let hotBar = [];
 let farmGrid = [];
@@ -19,7 +15,8 @@ let direction = [1,1];
 let holding = 0;
 let mouseHolding = "";
 let shouldMove = true;
-let theHouse, house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
+let buildingArray = [];
+let theMerchant, theHouse, house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
 const FARMCELLH = 10;
@@ -55,7 +52,10 @@ function setup() {
   hotBar[0][1] = "select";
   hotBar[1][1] = "hoe";
   hotBar[2][1] = "wateringCan";
-  theHouse = new Building(width/2 - 50,0,house,100, 100);
+  theHouse = new Building(width/2 - 50,0,house, 100, 100);
+  buildingArray.push(theHouse);
+  theMerchant = new Building(width - 200, 0,merchant, 100, 100);
+  buildingArray.push(theMerchant);
 }
 
 
@@ -65,6 +65,7 @@ function draw() {
   backdrop();
   displayFarmGrid(farmGrid,0,height - FARMCELLH * farmCellSize,farmCellSize);
   toolBar();
+  theMerchant.hitbox();
   theHouse.hitbox();
   player.moveCharacter();
   player.display();
@@ -78,6 +79,7 @@ function draw() {
   }
   inventory.mouseItemDisplay();
   theHouse.display();
+  theMerchant.display();
 }  
 
 function keyPressed(){
@@ -100,6 +102,10 @@ class Building{
     this.height = height;
     this.theImage = theImage;
 
+    this.playerUp = [false, true];
+    this.playerLeft = [false, true];
+    this.playerRight  = [false, true];
+    this.playerDown = [false, true];
   }
 
   display(){
@@ -109,30 +115,30 @@ class Building{
   hitbox(){
 
     //checking to see if you hit wall (right side)
-    if (playerRight[0] && player.x < this.x && player.dx * 2 + player.x > this.x && player.y < this.y + this.height){
-      playerRight[1] = false;
+    if (this.playerRight[0] && player.x < this.x && player.dx * 2 + player.x > this.x && player.y < this.y + this.height){
+      this.playerRight[1] = false;
       console.log("here");
     }
     //checking to see if you hit wall (left side)
-    else if (playerLeft[0] && player.x > this.x + this.width && player.x - player.dx *2 < this.x + this.width && player.y < this.y + this.height){
-      playerLeft[1] = false;
+    else if (this.playerLeft[0] && player.x > this.x + this.width && player.x - player.dx *2 < this.x + this.width && player.y < this.y + this.height){
+      this.playerLeft[1] = false;
     }
     //checking to see if you hit wall (top side)
-    else if (playerUp[0] && player.y > this.y + this.height && player.x > this.x && player.x < this.x + this.width && player.y - player.height/2 - player.dy * 2 < this.y + this.height){
-      playerUp[1] = false;
+    else if (this.playerUp[0] && player.y > this.y + this.height && player.x > this.x && player.x < this.x + this.width && player.y - player.height/2 - player.dy * 2 < this.y + this.height){
+      this.playerUp[1] = false;
     }
     //console.log();
     
-    if (!playerRight[1] && !(player.y < this.y + this.height)){
-      playerRight[1] = true;
+    if (!this.playerRight[1] && !(player.y < this.y + this.height)){
+      this.playerRight[1] = true;
     }
-    if(!playerLeft[1] && !(player.y < this.y + this.height)){
-      playerLeft[1] = true;
+    if(!this.playerLeft[1] && !(player.y < this.y + this.height)){
+      this.playerLeft[1] = true;
     }
-    if (!playerUp[1] && !(player.x > this.x && player.x < this.x + this.width ))
-      playerUp[1] = true;
+    if (!this.playerUp[1] && !(player.x > this.x && player.x < this.x + this.width )){
+      this.playerUp[1] = true;
+    }
   }
-
 }
 
 //the player character object 
@@ -169,43 +175,61 @@ class Player{
   moveCharacter(){
     //making it so the image will turn left if walking left and moving character when pressing wasd and checking to make sure 
     //that they dont walk off edge
-    if (keyIsDown(65) && this.x - this.dx >= 0 + this.width /2 && playerLeft[1]) {  //left
+    
+    if (keyIsDown(65) && this.x - this.dx >= 0 + this.width /2 && buildingArray[0].playerLeft[1] && buildingArray[1].playerLeft[1]) {  //left
       this.x -= this.dx;
       direction = [-1,1];
-      playerLeft[0] = true;
-      playerRight[1] = true;
+      for(let i = 0;i < buildingArray.length; i++){
+        buildingArray[i].playerLeft[0] = true;
+        buildingArray[i].playerRight[1] = true;
+
+      }
     }
     else{
-      playerLeft[0] = false;
+      for(let i = 0;i < buildingArray.length; i++){
+        buildingArray[i].playerLeft[0] = false;
+      }
     }
   
-    if (keyIsDown(68) && this.x + this.dx <= width - this.width /2 && playerRight[1]) {//right
+    if (keyIsDown(68) && this.x + this.dx <= width - this.width /2 && buildingArray[0].playerRight[1] && buildingArray[1].playerRight[1]) {//right
       this.x += this.dx;
       direction = [1,1];
-      playerRight[0] = true;
-      playerLeft[1] = true;
+      for(let i = 0;i < buildingArray.length; i++){
+        buildingArray[i].playerRight[0] = true;
+        buildingArray[i].playerLeft[1] = true;
+      }
     }
     else{
-      playerRight[0] = false;
+      for(let i = 0;i < buildingArray.length; i++){
+        buildingArray[i].playerRight[0] = false;
+      }
     }
 
   
-    if (keyIsDown(87) && this.y - this.dy >= 0 + this.height/ 2 && playerUp[1]) { //up
+    if (keyIsDown(87) && this.y - this.dy >= 0 + this.height/ 2 && buildingArray[0].playerUp[1] && buildingArray[1].playerUp[1]) { //up
       this.y -= this.dy;
-      playerUp[0] = true;
-      playerDown[1] = true;
+      for(let i = 0;i < buildingArray.length; i++){
+        buildingArray[i].playerUp[0] = true;
+        buildingArray[i].playerDown[1] = true;
+      }
     }
     else{
-      playerUp[0] = false;
+      for(let i = 0;i < buildingArray.length; i++){
+        buildingArray[i].playerUp[0] = false;
+      }
     }
 
-    if (keyIsDown(83) && this.y + this.dy <= height - this.height / 2 && playerDown[1]) { //down
+    if (keyIsDown(83) && this.y + this.dy <= height - this.height / 2 && buildingArray[0].playerDown[1]) { //down
       this.y += this.dy;
-      playerDown[0] = true;
-      playerUp[1] = true;
+      for(let i = 0;i < buildingArray.length; i++){
+        buildingArray[i].playerDown[0] = true;
+        buildingArray[i].playerUp[1] = true;
+      }
     }
     else{
-      playerDown[0] = false;
+      for(let i = 0;i < buildingArray.length; i++){
+        buildingArray[i].playerDown[0] = false;
+      }
     }
 
   }
@@ -214,7 +238,6 @@ class Player{
 // creating the background (everything besides the farm plot)
 function backdrop(){
   imageMode(CORNER);
-  image(merchant, width / 16*14,0, 100,100);
 }
 
 //creating any empty grid by putting in the grid im changing and how many squares left and right
