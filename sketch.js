@@ -107,22 +107,30 @@ class Building{
   }
 
   hitbox(){
-    //console.log(shouldMove);
-    console.log(playerRight[0] && player.x < this.x && player.dx * 2 + player.x > this.x && player.y < this.y + this.height);
+
+    //checking to see if you hit wall (right side)
     if (playerRight[0] && player.x < this.x && player.dx * 2 + player.x > this.x && player.y < this.y + this.height){
       playerRight[1] = false;
       console.log("here");
     }
-
+    //checking to see if you hit wall (left side)
     else if (playerLeft[0] && player.x > this.x + this.width && player.x - player.dx *2 < this.x + this.width && player.y < this.y + this.height){
       playerLeft[1] = false;
     }
-
-    else if (playerUp[0] === "up" && player.y < this.y + player.height && player.x > this.x && player.x < this.x + this.width && player.y > this.y + this.height && player.y + player.dy *2 < this.y + this.height){
+    //checking to see if you hit wall (top side)
+    else if (playerUp[0] && player.y > this.y + this.height && player.x > this.x && player.x < this.x + this.width && player.y - player.height/2 - player.dy * 2 < this.y + this.height){
       playerUp[1] = false;
     }
-
-
+    //console.log();
+    
+    if (!playerRight[1] && !(player.y < this.y + this.height)){
+      playerRight[1] = true;
+    }
+    if(!playerLeft[1] && !(player.y < this.y + this.height)){
+      playerLeft[1] = true;
+    }
+    if (!playerUp[1] && !(player.x > this.x && player.x < this.x + this.width ))
+      playerUp[1] = true;
   }
 
 }
