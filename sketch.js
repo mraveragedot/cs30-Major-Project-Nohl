@@ -112,7 +112,8 @@ class Building{
     image(this.theImage,this.x, this.y, this.width, this.width);
   }
 
-  hitbox(){
+  hitbox(){ // the code here doesnt work that well just based on the questions im asking in my if statements if i have time i will come back to fix it
+    //dont have a down questions because the only buildings will be on the top of the screen
 
     //checking to see if you hit wall (right side)
     if (this.playerRight[0] && player.x < this.x && player.dx * 2 + player.x > this.x && player.y < this.y + this.height){
@@ -137,6 +138,33 @@ class Building{
     }
     if (!this.playerUp[1] && !(player.x > this.x && player.x < this.x + this.width )){
       this.playerUp[1] = true;
+    }
+  }
+}
+
+class Home extends Building{
+  nextDay(){
+    if ((this.x - mouseX)/this.width < 1 && (this.y - mouseY) / this.height < 1){
+      this.nextDayScreen = true;
+    }
+  }
+
+  showNextDayScreen(){
+    if(this.nextDayScreen){
+      rectMode(CENTER);
+      fill(0);
+      rect(width/2,height/2,200,100);
+      fill("white");
+      text("would you like to go to sleep?", width/2 - 75, height/2 - 30);
+      fill("green");
+      rect(width/2 - 50, height/2, 50,50);
+      fill(0);
+      text("yes",width/2 - 50, height/2, 50,50);
+      fill("red");
+      rect(width/2 + 50, height/2 , 50,50);
+      fill(0);
+      text("no", width/2 + 50, height/2 , 50,50);
+    
     }
   }
 }
