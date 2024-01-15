@@ -52,7 +52,7 @@ function setup() {
   hotBar[0][1] = "select";
   hotBar[1][1] = "hoe";
   hotBar[2][1] = "wateringCan";
-  theHouse = new Building(width/2 - 50,0,house, 100, 100);
+  theHouse = new Home(width/2 - 50,0,house, 100, 100);
   buildingArray.push(theHouse);
   theMerchant = new Building(width - 200, 0,merchant, 100, 100);
   buildingArray.push(theMerchant);
@@ -80,6 +80,7 @@ function draw() {
   inventory.mouseItemDisplay();
   theHouse.display();
   theMerchant.display();
+  theHouse.showNextDayScreen();
 }  
 
 function keyPressed(){
@@ -144,7 +145,12 @@ class Building{
 
 class Home extends Building{
   nextDay(){
-    if ((this.x - mouseX)/this.width < 1 && (this.y - mouseY) / this.height < 1){
+
+    let x = (this.x - mouseX)/this.width;
+    let y = (this.y - mouseY) / this.height;
+    console.log(x, y);
+
+    if (x < 1 && y < 1 && x > 0 && y > 0){
       this.nextDayScreen = true;
     }
   }
@@ -493,4 +499,5 @@ function mousePressed(){
 
   inventory.movingItems();
 
+  theHouse.nextDay();
 }
