@@ -6,6 +6,7 @@
 // - describe what you did to take this project "above and beyond"
 
 //making variables
+let merchantArray = [];
 let items = [];
 let openInventory = [false, true];
 let inventoryGrid = [];
@@ -16,7 +17,8 @@ let holding = 0;
 let mouseHolding = "";
 let shouldMove = true;
 let buildingArray = [];
-let theMerchant, theHouse, house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
+let theDay = 0;
+let merchantInventory, theMerchant, theHouse, house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
 const FARMCELLH = 10;
@@ -40,6 +42,8 @@ function preload(){
 
 //creating cell sizes and grides for farming plots
 function setup() {
+  createEmptyGrid(merchantArray, 1,4,1);
+  merchantInventory = new storageGrid(width/2,height/2,farmCellSize*1.5,emptyInventory,merchantArray);
   items = [["hoe", hoe],["carrotSeeds", carrotSeeds], ["wateringCan", wateringCan]];
   createEmptyGrid(inventoryGrid, 5,5,1);
   createCanvas(windowWidth, windowHeight);
@@ -54,7 +58,7 @@ function setup() {
   hotBar[2][1] = "wateringCan";
   theHouse = new Home(width/2 - 50,0,house, 100, 100);
   buildingArray.push(theHouse);
-  theMerchant = new Building(width - 200, 0,merchant, 100, 100);
+  theMerchant = new Shop(width - 200, 0,merchant, 100, 100);
   buildingArray.push(theMerchant);
 }
 
@@ -102,6 +106,7 @@ class Building{
     this.width = width;
     this.height = height;
     this.theImage = theImage;
+    this.nextDayScreen = false;
 
     this.playerUp = [false, true];
     this.playerLeft = [false, true];
@@ -119,7 +124,6 @@ class Building{
     //checking to see if you hit wall (right side)
     if (this.playerRight[0] && player.x < this.x && player.dx * 2 + player.x > this.x && player.y < this.y + this.height){
       this.playerRight[1] = false;
-      console.log("here");
     }
     //checking to see if you hit wall (left side)
     else if (this.playerLeft[0] && player.x > this.x + this.width && player.x - player.dx *2 < this.x + this.width && player.y < this.y + this.height){
@@ -129,7 +133,6 @@ class Building{
     else if (this.playerUp[0] && player.y > this.y + this.height && player.x > this.x && player.x < this.x + this.width && player.y - player.height/2 - player.dy * 2 < this.y + this.height){
       this.playerUp[1] = false;
     }
-    //console.log();
     
     if (!this.playerRight[1] && !(player.y < this.y + this.height)){
       this.playerRight[1] = true;
@@ -148,13 +151,35 @@ class Home extends Building{
 
     let x = (this.x - mouseX)/this.width;
     let y = (this.y - mouseY) / this.height;
-    console.log(x, y);
 
-    if (x < 1 && y < 1 && x > 0 && y > 0){
+    if (x < 0 && y < 0 && x > -1 && y > -1){
       this.nextDayScreen = true;
+    }
+
+    if(this.nextDayScreen){
+
+      //looking if your in the yes box
+      x = (width/2 - 50 - mouseX)/50;
+      y = (height/2 - mouseY)/50;
+      if(x > -0.5 && x < 0.5 && y > -0.5 && y < 0.5){
+        theDay ++; 
+        this.nextDayScreen = false;
+        growCrops();
+      }
+
+      //looking if your in the no box
+      x = (width/2 + 50 - mouseX)/50;
+      y = (height/2 - mouseY)/50;
+      if(x > -0.5 && x < 0.5 && y > -0.5 && y < 0.5){
+        this.nextDayScreen = false;
+      }
+
+
+
     }
   }
 
+  
   showNextDayScreen(){
     if(this.nextDayScreen){
       rectMode(CENTER);
@@ -170,8 +195,24 @@ class Home extends Building{
       rect(width/2 + 50, height/2 , 50,50);
       fill(0);
       text("no", width/2 + 50, height/2 , 50,50);
+      rectMode(CORNER);
+      fill("white");
     
     }
+  }
+}
+
+class Shop extends Building{
+  shopClicked(){
+
+    let x = (this.x - mouseX)/this.width;
+    let y = (this.y - mouseY) / this.height;
+    //console.log(x, y);
+
+    if (x < 0 && y < 0 && x > -1 && y > -1){
+      merchantInventory.shouldDisplay = true;
+    }
+
   }
 }
 
@@ -378,7 +419,7 @@ function movingToolBarItems(){
     console.log(mouseHolding);
 
   }
-  else if (x >= 0 && x < 1 && y >= 0 && y < hotBar.length && hotBar[y][1] !== "select"){// putting soemthing down into hotbar
+  else if (x >= 0 && x < 1 && y >= 0 && y < hotBar.length && (hotBar[y][1] === 0 || hotBar[y][1] === "")){// putting soemthing down into hotbar
     hotBar[y][1] = mouseHolding;
     mouseHolding = "";
     console.log(mouseHolding);
@@ -479,7 +520,7 @@ class storageGrid{
       this.grid[y][x] = 0;
     }
     //if holding something put it down
-    else if (this.shouldDisplay && x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length){
+    else if (this.shouldDisplay && x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length && (this.grid[y][x] === 0 || this.grid[y][x] === "")){
       this.grid[y][x] = mouseHolding;
       mouseHolding = "";
     }
@@ -500,4 +541,9 @@ function mousePressed(){
   inventory.movingItems();
 
   theHouse.nextDay();
+  theMerchant.shopClicked();
+}
+
+function growCrops(){
+
 }
