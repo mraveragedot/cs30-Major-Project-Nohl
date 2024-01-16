@@ -6,7 +6,7 @@
 // - describe what you did to take this project "above and beyond"
 
 //making variables
-let merchantArray = [];
+let merchantArray = [["hoe", "wateringCan", "carrotSeeds", 0]];
 let items = [];
 let openInventory = [false, true];
 let inventoryGrid = [];
@@ -42,8 +42,6 @@ function preload(){
 
 //creating cell sizes and grides for farming plots
 function setup() {
-  createEmptyGrid(merchantArray, 1,4,1);
-  merchantInventory = new storageGrid(width/2,height/2,farmCellSize*1.5,emptyInventory,merchantArray);
   items = [["hoe", hoe],["carrotSeeds", carrotSeeds], ["wateringCan", wateringCan]];
   createEmptyGrid(inventoryGrid, 5,5,1);
   createCanvas(windowWidth, windowHeight);
@@ -52,7 +50,9 @@ function setup() {
   player = new Player(width/2, height/2, farmer);
   createEmptyGrid(hotBar,4,1,2);
   hotBarSize = farmCellSize*2;
-  inventory = new storageGrid(width/2,height/2,farmCellSize*1.5,emptyInventory,inventoryGrid);
+  inventory = new StorageGrid(width/2,height/2,farmCellSize*1.5,emptyInventory,inventoryGrid);
+  merchantInventory = new Store(width/2,height/2,farmCellSize*1.5,emptyInventory,merchantArray);
+  console.log(merchantArray)
   hotBar[0][1] = "select";
   hotBar[1][1] = "hoe";
   hotBar[2][1] = "wateringCan";
@@ -74,7 +74,17 @@ function draw() {
   player.moveCharacter();
   player.display();
   circle(player.x,player.y, 5);
-  if(inventory.toggle){
+
+  if(merchantInventory.toggle){
+  merchantInventory.moving();
+  }
+  if(merchantInventory.shouldDisplay){
+    merchantInventory.display();
+    merchantInventory.itemDisplay();
+  }
+  //merchantInventory.mouseItemDisplay();
+
+if(inventory.toggle){
     inventory.moving();
   }
   if(inventory.shouldDisplay){
@@ -82,6 +92,8 @@ function draw() {
     inventory.itemDisplay();
   }
   inventory.mouseItemDisplay();
+  
+
   theHouse.display();
   theMerchant.display();
   theHouse.showNextDayScreen();
@@ -174,8 +186,6 @@ class Home extends Building{
         this.nextDayScreen = false;
       }
 
-
-
     }
   }
 
@@ -207,10 +217,13 @@ class Shop extends Building{
 
     let x = (this.x - mouseX)/this.width;
     let y = (this.y - mouseY) / this.height;
-    //console.log(x, y);
 
     if (x < 0 && y < 0 && x > -1 && y > -1){
-      merchantInventory.shouldDisplay = true;
+      merchantInventory.shouldDisplay = !merchantInventory.shouldDisplay;
+      if(!merchantInventory.shouldDisplay){
+        merchantInventory.x = width/2;
+        merchantInventory.y = width/4;
+      }
     }
 
   }
@@ -364,7 +377,7 @@ function interactionWithFarm(){
 
   // turning player position into a grid position
   let offset;
-  let y = Math.floor((player.y - (height - FARMCELLH * farmCellSize,farmCellSize)) / farmCellSize ) - floor(height/farmCellSize - farmGrid.length) + 1;
+  let y = Math.floor((player.y - (height - FARMCELLH * farmCellSize,farmCellSize)) / farmCellSize ) - floor(height/farmCellSize - farmGrid.length); 
   if (direction[0] === -1){ // make sure your interaction with the plot your looking
     offset = -1;
   }
@@ -405,6 +418,9 @@ function toolBar(){
     if(hotBar[i][1] === "wateringCan"){
       image(wateringCan,0,0 + hotBarSize * i,hotBarSize,hotBarSize);
     }
+    if(hotBar[i][1] === "carrotSeeds"){
+      image(carrotSeeds,0,0 + hotBarSize * i,hotBarSize,hotBarSize);
+    }
   }
 
 }
@@ -423,6 +439,9 @@ function movingToolBarItems(){
     hotBar[y][1] = mouseHolding;
     mouseHolding = "";
     console.log(mouseHolding);
+  }
+  else{
+    merchantInventory.movingItems();
   }
 }
 
@@ -449,7 +468,7 @@ function mouseWheel(event) {
   hotBar[holding][0] = 1; // selecting the right box
 }
 
-class storageGrid{
+class StorageGrid{
   constructor(x, y, size, theImage, grid){
     this.x = x;
     this.y = y;
@@ -530,6 +549,26 @@ class storageGrid{
   }
 }
 
+class Store extends StorageGrid{
+
+  movingItems(){
+    let x = floor((mouseX - this.x) / this.size);
+    let y = floor((mouseY - this.y) / this.size);
+
+    //if not holding somthing after clicked mouse pick it up 
+    if(this.shouldDisplay && x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length && mouseHolding === "" && this.grid[y][x] !== 0){
+      mouseHolding = this.grid[y][x];
+
+      //this.grid[y][x] = 0;
+    }
+    //if holding something sell it 
+    else if (this.shouldDisplay && x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length && (this.grid[y][x] === 0 || this.grid[y][x] === "")){
+      mouseHolding = "";
+    }
+  }
+
+}
+
 function mousePressed(){
   if (inventory.shouldDisplay && (mouseX - inventory.x > 0 && mouseX - inventory.x < inventory.width) && (mouseY - inventory.y < 0 && mouseY - inventory.y > inventory.height)){//makes offset only once
     inventory.xOffset = mouseX - inventory.x; //if mouse is pressed in the inventory box set offset and toggle the movement on 
@@ -538,7 +577,16 @@ function mousePressed(){
     inventory.toggle = true;
   }
 
+  if (merchantInventory.shouldDisplay && (mouseX - merchantInventory.x > 0 && mouseX - merchantInventory.x < merchantInventory.width) && (mouseY - merchantInventory.y < 0 && mouseY - merchantInventory.y > merchantInventory.height)){//makes offset only once
+    merchantInventory.xOffset = mouseX - merchantInventory.x; //if mouse is pressed in the merchantInventory box set offset and toggle the movement on 
+    merchantInventory.yOffset = mouseY - merchantInventory.y;  
+
+    merchantInventory.toggle = true;
+  }
+
+
   inventory.movingItems();
+
 
   theHouse.nextDay();
   theMerchant.shopClicked();
