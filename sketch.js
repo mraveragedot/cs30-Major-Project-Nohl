@@ -6,7 +6,7 @@
 // - describe what you did to take this project "above and beyond"
 
 //making variables
-let merchantArray = [["hoe", "wateringCan", "carrotSeeds", 0]];
+let merchantArray = [["hoe", "wateringCan", ["carrotSeeds", 1], 0]];
 let items = [];
 let openInventory = [false, true];
 let inventoryGrid = [];
@@ -18,6 +18,7 @@ let mouseHolding = "";
 let shouldMove = true;
 let buildingArray = [];
 let theDay = 0;
+let gold = 0;
 let merchantInventory, theMerchant, theHouse, house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
@@ -42,7 +43,7 @@ function preload(){
 
 //creating cell sizes and grides for farming plots
 function setup() {
-  items = [["hoe", hoe],["carrotSeeds", carrotSeeds], ["wateringCan", wateringCan]];
+  items = [["hoe", hoe],["carrotSeeds", carrotSeeds, 1], ["wateringCan", wateringCan]];
   createEmptyGrid(inventoryGrid, 5,5,1);
   createCanvas(windowWidth, windowHeight);
   farmCellSize = width/FARMCELLW;
@@ -52,7 +53,7 @@ function setup() {
   hotBarSize = farmCellSize*2;
   inventory = new StorageGrid(width/2,height/2,farmCellSize*1.5,emptyInventory,inventoryGrid);
   merchantInventory = new Store(width/2,height/2,farmCellSize*1.5,emptyInventory,merchantArray);
-  console.log(merchantArray)
+  console.log(merchantArray);
   hotBar[0][1] = "select";
   hotBar[1][1] = "hoe";
   hotBar[2][1] = "wateringCan";
@@ -76,7 +77,7 @@ function draw() {
   circle(player.x,player.y, 5);
 
   if(merchantInventory.toggle){
-  merchantInventory.moving();
+    merchantInventory.moving();
   }
   if(merchantInventory.shouldDisplay){
     merchantInventory.display();
@@ -84,7 +85,7 @@ function draw() {
   }
   //merchantInventory.mouseItemDisplay();
 
-if(inventory.toggle){
+  if(inventory.toggle){
     inventory.moving();
   }
   if(inventory.shouldDisplay){
@@ -97,6 +98,11 @@ if(inventory.toggle){
   theHouse.display();
   theMerchant.display();
   theHouse.showNextDayScreen();
+
+  fill(0);
+  rectMode(CORNER);
+  text("you have " + gold + " gold", hotBarSize, 10);
+  fill("white");
 }  
 
 function keyPressed(){
@@ -377,7 +383,7 @@ function interactionWithFarm(){
 
   // turning player position into a grid position
   let offset;
-  let y = Math.floor((player.y - (height - FARMCELLH * farmCellSize,farmCellSize)) / farmCellSize ) - floor(height/farmCellSize - farmGrid.length); 
+  let y = Math.floor((player.y - (height - FARMCELLH * farmCellSize,farmCellSize)) / farmCellSize ) - floor(height/farmCellSize - farmGrid.length - 1); 
   if (direction[0] === -1){ // make sure your interaction with the plot your looking
     offset = -1;
   }
@@ -395,6 +401,9 @@ function interactionWithFarm(){
       }
       if (hotBar[holding][1] === "wateringCan" && farmGrid[y][x][0] === 1){
         farmGrid[y][x][0] = 2;
+      }
+      if (hotBar[holding][1] === "carrotSeeds" && (farmGrid[y][x][0] === 1 || farmGrid[y][x][0] === 2)){
+        farmGrid[y][x][1] = 1;
       }
 
     }
@@ -428,14 +437,14 @@ function toolBar(){
 function movingToolBarItems(){
   let x = floor(mouseX / hotBarSize);
   let y = floor(mouseY / hotBarSize);
-  if(x >= 0 && x < 1 && y >= 0 && y < hotBar.length && mouseHolding === "" && hotBar[y][1] !== 0 && hotBar[y][1] !== "select"){ // picking up somehting from hotBar
+  if(x >= 0 && x < 1 && y >= 0 && y < hotBar.length && mouseHolding === "" && hotBar[y][1] !== 0 && hotBar[y][1] !== "select"){ // picking up something from hotBar
     console.log("grabbing");
     mouseHolding = hotBar[y][1];
     hotBar[y][1] = 0;
     console.log(mouseHolding);
 
   }
-  else if (x >= 0 && x < 1 && y >= 0 && y < hotBar.length && (hotBar[y][1] === 0 || hotBar[y][1] === "")){// putting soemthing down into hotbar
+  else if (x >= 0 && x < 1 && y >= 0 && y < hotBar.length && (hotBar[y][1] === 0 || hotBar[y][1] === "")){// putting something down into hotbar
     hotBar[y][1] = mouseHolding;
     mouseHolding = "";
     console.log(mouseHolding);
@@ -488,7 +497,7 @@ class StorageGrid{
     for(let y = 0; y < this.grid.length; y++){
       for (let x = 0; x < this.grid[y].length; x++){
         image(this.theImage, this.x + this.size * x ,this.y + this.size * y,this.size,this.size);//drawing the empty squares
-        rect(this.x,this.y,this.width,this.height); //drawing the white box ontop
+        rect(this.x,this.y,this.width,this.height); //drawing the white rectangle ontop
       }
     }
   }
@@ -509,6 +518,7 @@ class StorageGrid{
       for (let x = 0; x < this.grid[y].length; x++){
         for(let thing of items){
           if(this.grid[y][x] === thing[0]){
+            console.log(thing, this.grid[y][x])
             image(thing[1], this.x + this.size * x, this.y + this.size * y, this.size, this.size);
           }
         }
