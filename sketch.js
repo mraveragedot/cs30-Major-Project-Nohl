@@ -19,13 +19,22 @@ let shouldMove = true;
 let buildingArray = [];
 let theDay = 0;
 let gold = 15;
-let merchantInventory, theMerchant, theHouse, house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
+let backgroundPlay = false;
+let hoeSound, wateringSound, plantingSound, carrotSound, backgroundMusic, sellingSound, merchantInventory, theMerchant, theHouse, house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
 const FARMCELLH = 10;
 
 //turning images and sounds into variabes
 function preload(){
+  hoeSound = loadSound("assets/stepstone_2.wav");
+  plantingSound = loadSound("assets/stepdirt_1.wav");
+  carrotSound = loadSound("assets/pop.ogg");
+  backgroundMusic = loadSound("assets/TownTheme.mp3");
+  sellingSound = loadSound("assets/1_Coins.ogg");
+  wateringSound = loadSound("assets/splash2.wav");
+
+
   house = loadImage("assets/house.png");
   theSelect = loadImage("assets/select.png");
   emptyInventory = loadImage("assets/empty-inventory.png");
@@ -65,6 +74,9 @@ function setup() {
 
 //main draw loop
 function draw() {
+  if(backgroundPlay && !backgroundMusic.isPlaying()){
+    backgroundMusic.loop();
+  }
   background(220);
   backdrop();
   displayFarmGrid(farmGrid,0,height - FARMCELLH * farmCellSize,farmCellSize);
@@ -397,12 +409,15 @@ function interactionWithFarm(){
       // whats happeneing based on tool held
       if (hotBar[holding][1] === "hoe" && farmGrid[y][x][0] === 0){ // tills the ground
         farmGrid[y][x][0] = 1;
+        hoeSound.play();
       }
       if (hotBar[holding][1] === "wateringCan" && farmGrid[y][x][0] === 1){ // waters tilled soil
         farmGrid[y][x][0] = 2;
+        wateringSound.play();
       }
       if (hotBar[holding][1][0] === "carrotSeeds" && (farmGrid[y][x][0] === 1 || farmGrid[y][x][0] === 2)){ // plants seeds on tilled spoil
         farmGrid[y][x][1] = 1;
+        plantingSound.play();
         hotBar[holding] = [1, ["carrotSeeds", hotBar[holding][1][1] - 1]]; // decreses number of carrots held and if its zero makes hotbar clear the carrots
         if (hotBar[holding][1][1]  < 1){
           hotBar[holding] = [1, 0];
@@ -411,6 +426,7 @@ function interactionWithFarm(){
       if (hotBar[holding][1] === "select" && farmGrid[y][x][1] === 2){ //picks up carrots
         farmGrid[y][x][1] = 0;
         moveCarrotToInventory(x,y); //puts carrots in inventory
+        carrotSound.play();
       }
 
 
@@ -604,9 +620,11 @@ class Store extends StorageGrid{
     else if (this.shouldDisplay && x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length && (this.grid[y][x] === 0 || this.grid[y][x] === "")){
       if(mouseHolding[0] === "carrotSeeds"){
         gold += 5 * mouseHolding[1];
+        sellingSound.play();
       }
       if (mouseHolding[0] === "carrot"){
         gold += 7 * mouseHolding[1];
+        sellingSound.play();
       }
       mouseHolding = "";
     }
@@ -629,12 +647,12 @@ function mousePressed(){
     merchantInventory.toggle = true;
   }
 
-
   inventory.movingItems();
-
 
   theHouse.nextDay();
   theMerchant.shopClicked();
+
+  backgroundPlay = true;
 }
 
 function growCrops(){ // goes through the farm grid and changes all watered and seeded tiles to carrots
