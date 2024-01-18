@@ -403,9 +403,9 @@ function interactionWithFarm(){
       }
       if (hotBar[holding][1][0] === "carrotSeeds" && (farmGrid[y][x][0] === 1 || farmGrid[y][x][0] === 2)){ // plants seeds on tilled spoil
         farmGrid[y][x][1] = 1;
-        hotBar[holding] = [1, ["carrotSeeds", hotBar[holding][1][1] - 1]] // decreses number of carrots held and if its zero makes hotbar clear the carrots
+        hotBar[holding] = [1, ["carrotSeeds", hotBar[holding][1][1] - 1]]; // decreses number of carrots held and if its zero makes hotbar clear the carrots
         if (hotBar[holding][1][1]  < 1){
-          hotBar[holding] = [1, 0]
+          hotBar[holding] = [1, 0];
         }
       }
       if (hotBar[holding][1] === "select" && farmGrid[y][x][1] === 2){ //picks up carrots
@@ -437,11 +437,11 @@ function toolBar(){
     }
     if(hotBar[i][1][0] === "carrotSeeds"){
       image(carrotSeeds,0,0 + hotBarSize * i,hotBarSize,hotBarSize);
-      text(hotBar[i][1][1],0,0 + hotBarSize * i + 10 )
+      text(hotBar[i][1][1],0,0 + hotBarSize * i + 10 );
     }
     if(hotBar[i][1][0] === "carrot"){
       image(carrot,0,0 + hotBarSize * i,hotBarSize,hotBarSize);
-      text(hotBar[i][1][1],0,0 + hotBarSize * i - 10 )
+      text(hotBar[i][1][1],0,0 + hotBarSize * i - 10 );
     }
 
   }
@@ -452,8 +452,8 @@ function movingToolBarItems(){
   let x = floor(mouseX / hotBarSize);
   let y = floor(mouseY / hotBarSize);
   if(x >= 0 && x < 1 && y >= 0 && y < hotBar.length && mouseHolding[0] === "carrotSeeds" && hotBar[y][1][0] === "carrotSeeds"){
-    mouseHolding = ["carrotSeeds", hotBar[y][1][1] + mouseHolding[1]];
-    hotBar[y] = [0,0];
+    hotBar[y] = [ hotBar[y][0],["carrotSeeds", hotBar[y][1][1] + mouseHolding[1]]];
+    mouseHolding = "";
   }
   else if(x >= 0 && x < 1 && y >= 0 && y < hotBar.length && mouseHolding === "" && hotBar[y][1] !== 0 && hotBar[y][1] !== "select"){ // picking up something from hotBar
     mouseHolding = hotBar[y][1];
@@ -537,7 +537,7 @@ class StorageGrid{
           if(this.grid[y][x] === thing[0] || this.grid[y][x][0] === thing[0]){
             image(thing[1], this.x + this.size * x, this.y + this.size * y, this.size, this.size);
             if (Number.isInteger(this.grid[y][x][1])){
-              text(this.grid[y][x][1],this.x + this.size * x, this.y + this.size * y + 10 )
+              text(this.grid[y][x][1],this.x + this.size * x, this.y + this.size * y + 10 );
             }
 
           }
@@ -554,7 +554,7 @@ class StorageGrid{
           image(thing[1],mouseX,mouseY, this.size, this.size);
         }
         if (Number.isInteger(mouseHolding[1])){
-          text(mouseHolding[1],mouseX-this.size/2,mouseY-this.size/2 + 10)
+          text(mouseHolding[1],mouseX-this.size/2,mouseY-this.size/2 + 10);
         }
       }
     }
@@ -603,10 +603,10 @@ class Store extends StorageGrid{
     //if holding something sell it 
     else if (this.shouldDisplay && x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length && (this.grid[y][x] === 0 || this.grid[y][x] === "")){
       if(mouseHolding[0] === "carrotSeeds"){
-        gold += 5 * mouseHolding[1]
+        gold += 5 * mouseHolding[1];
       }
       if (mouseHolding[0] === "carrot"){
-        gold += 7 * mouseHolding[1]
+        gold += 7 * mouseHolding[1];
       }
       mouseHolding = "";
     }
@@ -645,7 +645,7 @@ function growCrops(){ // goes through the farm grid and changes all watered and 
         farmGrid[y][x][1] = 2; // changing seeds to carrots
       }
       else if(farmGrid[y][x][0] === 1 && farmGrid[y][x][1] === 1){
-        farmGrid[y][x][1] = 0 // change to untilled
+        farmGrid[y][x][1] = 0; // change to untilled
       }
       else if(farmGrid[y][x][0] === 2){
         farmGrid[y][x][0] = 1; // change to dry
@@ -663,8 +663,8 @@ function growCrops(){ // goes through the farm grid and changes all watered and 
 }
 
 function moveCarrotToInventory(farmX, farmY){
-  let placed = false
-  console.log(farmX,farmY)
+  let placed = false;
+  console.log(farmX,farmY);
 
   //checks if there are any carrots already in inventory
   for(let y = 0; y < inventoryGrid.length;y++){
