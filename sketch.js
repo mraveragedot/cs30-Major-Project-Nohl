@@ -18,7 +18,7 @@ let mouseHolding = "";
 let shouldMove = true;
 let buildingArray = [];
 let theDay = 0;
-let gold = 0;
+let gold = 15;
 let merchantInventory, theMerchant, theHouse, house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
@@ -38,12 +38,12 @@ function preload(){
   soil = loadImage("assets/soil.png");
   wateredSoil = loadImage("assets/watered-soil.png");
   carrotSeeds = loadImage("assets/carrot-seeds.png");
-  carrot =loadImage("assets/carrot.png");
+  carrot = loadImage("assets/carrot.png");
 }
 
 //creating cell sizes and grides for farming plots
 function setup() {
-  items = [["hoe", hoe],["carrotSeeds", carrotSeeds, 1], ["wateringCan", wateringCan]];
+  items = [["hoe", hoe],["carrotSeeds", carrotSeeds, 1], ["wateringCan", wateringCan], ["carrot", carrot, 1]];
   createEmptyGrid(inventoryGrid, 5,5,1);
   createCanvas(windowWidth, windowHeight);
   farmCellSize = width/FARMCELLW;
@@ -53,7 +53,6 @@ function setup() {
   hotBarSize = farmCellSize*2;
   inventory = new StorageGrid(width/2,height/2,farmCellSize*1.5,emptyInventory,inventoryGrid);
   merchantInventory = new Store(width/2,height/2,farmCellSize*1.5,emptyInventory,merchantArray);
-  console.log(merchantArray);
   hotBar[0][1] = "select";
   hotBar[1][1] = "hoe";
   hotBar[2][1] = "wateringCan";
@@ -350,7 +349,7 @@ function createEmptyFarmGrid(grid,cols,rows){
   for (let y = 0; y < cols; y++){
     grid.push([]);
     for (let x = 0; x < rows; x++){
-      grid[y].push([0,0,0]);
+      grid[y].push([0,0]);
     }
   }
 }
@@ -372,7 +371,7 @@ function displayFarmGrid(grid,theX,theY,cellSize){
       if (grid[y][x][1] === 1){ //one in the one position means carrot seeds
         image(carrotSeeds,x*cellSize + theX,y*cellSize + theY,cellSize,cellSize);
       }
-      if (grid[y][x][2] === 1){ // one in the two position means its a grown carrot carrot 
+      if (grid[y][x][1] === 2){ // two in the one position means its a grown carrot  
         image(carrot,x*cellSize + theX,y*cellSize + theY,cellSize,cellSize);
       }
     }
@@ -396,15 +395,24 @@ function interactionWithFarm(){
     //catching edge cases
     if (x >= 0 && x < 40 && (y >= 0 && y < 10)){
       // whats happeneing based on tool held
-      if (hotBar[holding][1] === "hoe" && farmGrid[y][x][0] === 0){
+      if (hotBar[holding][1] === "hoe" && farmGrid[y][x][0] === 0){ // tills the ground
         farmGrid[y][x][0] = 1;
       }
-      if (hotBar[holding][1] === "wateringCan" && farmGrid[y][x][0] === 1){
+      if (hotBar[holding][1] === "wateringCan" && farmGrid[y][x][0] === 1){ // waters tilled soil
         farmGrid[y][x][0] = 2;
       }
-      if (hotBar[holding][1] === "carrotSeeds" && (farmGrid[y][x][0] === 1 || farmGrid[y][x][0] === 2)){
+      if (hotBar[holding][1][0] === "carrotSeeds" && (farmGrid[y][x][0] === 1 || farmGrid[y][x][0] === 2)){ // plants seeds on tilled spoil
         farmGrid[y][x][1] = 1;
+        hotBar[holding] = [1, ["carrotSeeds", hotBar[holding][1][1] - 1]] // decreses number of carrots held and if its zero makes hotbar clear the carrots
+        if (hotBar[holding][1][1]  < 1){
+          hotBar[holding] = [1, 0]
+        }
       }
+      if (hotBar[holding][1] === "select" && farmGrid[y][x][1] === 2){ //picks up carrots
+        farmGrid[y][x][1] = 0;
+        moveCarrotToInventory(x,y); //puts carrots in inventory
+      }
+
 
     }
   }
@@ -427,9 +435,15 @@ function toolBar(){
     if(hotBar[i][1] === "wateringCan"){
       image(wateringCan,0,0 + hotBarSize * i,hotBarSize,hotBarSize);
     }
-    if(hotBar[i][1] === "carrotSeeds"){
+    if(hotBar[i][1][0] === "carrotSeeds"){
       image(carrotSeeds,0,0 + hotBarSize * i,hotBarSize,hotBarSize);
+      text(hotBar[i][1][1],0,0 + hotBarSize * i + 10 )
     }
+    if(hotBar[i][1][0] === "carrot"){
+      image(carrot,0,0 + hotBarSize * i,hotBarSize,hotBarSize);
+      text(hotBar[i][1][1],0,0 + hotBarSize * i - 10 )
+    }
+
   }
 
 }
@@ -438,16 +452,13 @@ function movingToolBarItems(){
   let x = floor(mouseX / hotBarSize);
   let y = floor(mouseY / hotBarSize);
   if(x >= 0 && x < 1 && y >= 0 && y < hotBar.length && mouseHolding === "" && hotBar[y][1] !== 0 && hotBar[y][1] !== "select"){ // picking up something from hotBar
-    console.log("grabbing");
     mouseHolding = hotBar[y][1];
     hotBar[y][1] = 0;
-    console.log(mouseHolding);
 
   }
   else if (x >= 0 && x < 1 && y >= 0 && y < hotBar.length && (hotBar[y][1] === 0 || hotBar[y][1] === "")){// putting something down into hotbar
     hotBar[y][1] = mouseHolding;
     mouseHolding = "";
-    console.log(mouseHolding);
   }
   else{
     merchantInventory.movingItems();
@@ -468,8 +479,6 @@ function mouseWheel(event) {
   else if (holding < 0){ //wrapping bottom to top
     holding = 3;
   }
-  print(event.delta);
-  print(holding);
 
   for(let i = 0;i < hotBar.length; i ++){//unselecting all
     hotBar[i][0] = 0;
@@ -517,9 +526,16 @@ class StorageGrid{
     for(let y = 0; y < this.grid.length; y ++){
       for (let x = 0; x < this.grid[y].length; x++){
         for(let thing of items){
-          if(this.grid[y][x] === thing[0]){
-            console.log(thing, this.grid[y][x])
+          // if(this.grid[y][x].length === 2){
+          //   image(thing[1], this.x + this.size * x, this.y + this.size * y, this.size, this.size);
+          //   text(thing[2], this.x + this.size * x,(this.y + this.size * y) + 10,);
+          // }
+          if(this.grid[y][x] === thing[0] || this.grid[y][x][0] === thing[0]){
             image(thing[1], this.x + this.size * x, this.y + this.size * y, this.size, this.size);
+            if (Number.isInteger(this.grid[y][x][1])){
+              text(this.grid[y][x][1],this.x + this.size * x, this.y + this.size * y + 10 )
+            }
+
           }
         }
       }
@@ -530,8 +546,11 @@ class StorageGrid{
     imageMode(CENTER);
     if (mouseHolding !== ""){
       for(let thing of items){
-        if(mouseHolding === thing[0]){
+        if(mouseHolding === thing[0] || mouseHolding[0] === thing[0]){
           image(thing[1],mouseX,mouseY, this.size, this.size);
+        }
+        if (Number.isInteger(mouseHolding[1])){
+          text(mouseHolding[1],mouseX-this.size/2,mouseY-this.size/2 + 10)
         }
       }
     }
@@ -567,12 +586,24 @@ class Store extends StorageGrid{
 
     //if not holding somthing after clicked mouse pick it up 
     if(this.shouldDisplay && x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length && mouseHolding === "" && this.grid[y][x] !== 0){
-      mouseHolding = this.grid[y][x];
+      if(this.grid[y][x][0] === "carrotSeeds" && gold >= 5){
+        mouseHolding = this.grid[y][x];
+        gold -= 5;
+      }
+      else if (this.grid[y][x][0] !== "carrotSeeds"){
+        mouseHolding = this.grid[y][x];
+      }
 
       //this.grid[y][x] = 0;
     }
     //if holding something sell it 
     else if (this.shouldDisplay && x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length && (this.grid[y][x] === 0 || this.grid[y][x] === "")){
+      if(mouseHolding[0] === "carrotSeeds"){
+        gold += 5 * mouseHolding[1]
+      }
+      if (mouseHolding[0] === "carrot"){
+        gold += 7 * mouseHolding[1]
+      }
       mouseHolding = "";
     }
   }
@@ -602,6 +633,56 @@ function mousePressed(){
   theMerchant.shopClicked();
 }
 
-function growCrops(){
+function growCrops(){ // goes through the farm grid and changes all watered and seeded tiles to carrots
+  for(let y = 0; y < farmGrid.length;y++){
+    for(let x = 0; x < farmGrid[y].length;x++){
+      if (farmGrid[y][x][0] === 2 && farmGrid[y][x][1] === 1){
+        farmGrid[y][x][0] = 1; //changing watered to dry
+        farmGrid[y][x][1] = 2; // changing seeds to carrots
+      }
+      else if(farmGrid[y][x][0] === 1 && farmGrid[y][x][1] === 1){
+        farmGrid[y][x][1] = 0 // change to untilled
+      }
+      else if(farmGrid[y][x][0] === 2){
+        farmGrid[y][x][0] = 1; // change to dry
+      }
+      else if(farmGrid[y][x][0] === 1){
+        farmGrid[y][x][0] = 0; // change to untilled
+      }
+      else if(farmGrid[y][x][1] === 2){
+        farmGrid[y][x][0] = 1; // change to dry
+      }
 
+    }
+  }
+
+}
+
+function moveCarrotToInventory(farmX, farmY){
+  let placed = false
+  console.log(farmX,farmY)
+
+  //checks if there are any carrots already in inventory
+  for(let y = 0; y < inventoryGrid.length;y++){
+    for(let x = 0; x < inventoryGrid[y].length;x++){
+      if (inventoryGrid[y][x][0] === "carrot" && !placed){
+        inventoryGrid[y][x] = ["carrot", inventoryGrid[y][x][1] + 1];
+        farmGrid[farmY][farmX][1] = 0;
+        placed = true;
+        
+      }
+    }
+  }
+  //no previous carrots so puts it in first possible spot
+  for(let y = 0; y < inventoryGrid.length;y++){
+    for(let x = 0; x < inventoryGrid[y].length;x++){
+      if (inventoryGrid[y][x] === "" || inventoryGrid[y][x] === 0 && !placed){
+        inventoryGrid[y][x] = ["carrot", 1];
+        farmGrid[farmY][farmX][1] = 0;
+        placed = true;
+
+      }
+    }
+  }
+  //else do nothing
 }
