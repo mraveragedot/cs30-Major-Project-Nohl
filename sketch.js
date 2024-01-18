@@ -451,7 +451,11 @@ function toolBar(){
 function movingToolBarItems(){
   let x = floor(mouseX / hotBarSize);
   let y = floor(mouseY / hotBarSize);
-  if(x >= 0 && x < 1 && y >= 0 && y < hotBar.length && mouseHolding === "" && hotBar[y][1] !== 0 && hotBar[y][1] !== "select"){ // picking up something from hotBar
+  if(x >= 0 && x < 1 && y >= 0 && y < hotBar.length && mouseHolding[0] === "carrotSeeds" && hotBar[y][1][0] === "carrotSeeds"){
+    mouseHolding = ["carrotSeeds", hotBar[y][1][1] + mouseHolding[1]];
+    hotBar[y] = [0,0];
+  }
+  else if(x >= 0 && x < 1 && y >= 0 && y < hotBar.length && mouseHolding === "" && hotBar[y][1] !== 0 && hotBar[y][1] !== "select"){ // picking up something from hotBar
     mouseHolding = hotBar[y][1];
     hotBar[y][1] = 0;
 
