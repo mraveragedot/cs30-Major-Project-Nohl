@@ -20,7 +20,7 @@ let buildingArray = [];
 let theDay = 0;
 let gold = 15;
 let backgroundPlay = false;
-let hoeSound, wateringSound, plantingSound, carrotSound, backgroundMusic, sellingSound, merchantInventory, theMerchant, theHouse, house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
+let grassBackground, hoeSound, wateringSound, plantingSound, carrotSound, backgroundMusic, sellingSound, merchantInventory, theMerchant, theHouse, house, inventory, emptyInventory, theSelect, selected, hoe, wateringCan, soil, wateredSoil, carrotSeeds ,carrot, grass, hotBarSize, farmCellSize, player, merchant, farmer; 
 
 const FARMCELLW = 40;
 const FARMCELLH = 10;
@@ -34,7 +34,7 @@ function preload(){
   sellingSound = loadSound("assets/1_Coins.ogg");
   wateringSound = loadSound("assets/splash2.wav");
 
-
+  grassBackground = loadImage("assets/grassbackground.png");
   house = loadImage("assets/house.png");
   theSelect = loadImage("assets/select.png");
   emptyInventory = loadImage("assets/empty-inventory.png");
@@ -85,7 +85,6 @@ function draw() {
   theHouse.hitbox();
   player.moveCharacter();
   player.display();
-  circle(player.x,player.y, 5);
 
   if(merchantInventory.toggle){
     merchantInventory.moving();
@@ -143,7 +142,7 @@ class Building{
     this.playerDown = [false, true];
   }
 
-  display(){
+  display(){ // displays the image
     image(this.theImage,this.x, this.y, this.width, this.width);
   }
 
@@ -163,6 +162,7 @@ class Building{
       this.playerUp[1] = false;
     }
     
+    // makes it if you move out of the check range that you dont run into invisible wall
     if (!this.playerRight[1] && !(player.y < this.y + this.height)){
       this.playerRight[1] = true;
     }
@@ -181,7 +181,7 @@ class Home extends Building{
     let x = (this.x - mouseX)/this.width;
     let y = (this.y - mouseY) / this.height;
 
-    if (x < 0 && y < 0 && x > -1 && y > -1){
+    if (x < 0 && y < 0 && x > -1 && y > -1){//click house make screen pop up
       this.nextDayScreen = true;
     }
 
@@ -207,7 +207,7 @@ class Home extends Building{
   }
 
   
-  showNextDayScreen(){
+  showNextDayScreen(){ 
     if(this.nextDayScreen){
       rectMode(CENTER);
       fill(0);
@@ -343,6 +343,7 @@ class Player{
 // creating the background (everything besides the farm plot)
 function backdrop(){
   imageMode(CORNER);
+  image(grassBackground,0,0,width,height);
 }
 
 //creating any empty grid by putting in the grid im changing and how many squares left and right
@@ -415,10 +416,10 @@ function interactionWithFarm(){
         farmGrid[y][x][0] = 2;
         wateringSound.play();
       }
-      if (hotBar[holding][1][0] === "carrotSeeds" && (farmGrid[y][x][0] === 1 || farmGrid[y][x][0] === 2)){ // plants seeds on tilled spoil
+      if (hotBar[holding][1][0] === "carrotSeeds" && (farmGrid[y][x][0] === 1 || farmGrid[y][x][0] === 2) && farmGrid[y][x][1] === 0){ // plants seeds on tilled spoil
         farmGrid[y][x][1] = 1;
         plantingSound.play();
-        hotBar[holding] = [1, ["carrotSeeds", hotBar[holding][1][1] - 1]]; // decreses number of carrots held and if its zero makes hotbar clear the carrots
+        hotBar[holding] = [1, ["carrotSeeds", hotBar[holding][1][1] - 1]]; // decreases number of carrots held and if its zero makes hotbar clear the carrots
         if (hotBar[holding][1][1]  < 1){
           hotBar[holding] = [1, 0];
         }
@@ -582,8 +583,14 @@ class StorageGrid{
     let x = floor((mouseX - this.x) / this.size);
     let y = floor((mouseY - this.y) / this.size);
 
+    //if holding carrot seed and clicking another carrot seed stack them
+    if(this.shouldDisplay && x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length && mouseHolding[0] === "carrotSeeds" && this.grid[y][x][0] === "carrotSeeds"){
+      this.grid[y][x] = ["carrotSeeds", this.grid[y][x][1] + mouseHolding[1]];
+      mouseHolding = "";
+    }
+
     //if not holding somthing after clicked mouse pick it up 
-    if(this.shouldDisplay && x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length && mouseHolding === "" && this.grid[y][x] !== 0){
+    else if(this.shouldDisplay && x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length && mouseHolding === "" && this.grid[y][x] !== 0){
       mouseHolding = this.grid[y][x];
       this.grid[y][x] = 0;
     }
@@ -603,6 +610,11 @@ class Store extends StorageGrid{
   movingItems(){
     let x = floor((mouseX - this.x) / this.size);
     let y = floor((mouseY - this.y) / this.size);
+    // if holding carrot seeds and picking up more carrot seeds
+    if(gold >= 5 && this.shouldDisplay && x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length && mouseHolding[0] === "carrotSeeds" && this.grid[y][x][0] === "carrotSeeds"){
+      mouseHolding = ["carrotSeeds", mouseHolding[1] + 1];
+      gold -= 5;
+    }
 
     //if not holding somthing after clicked mouse pick it up 
     if(this.shouldDisplay && x >= 0 && x < this.grid[0].length && y >= 0 && y < this.grid.length && mouseHolding === "" && this.grid[y][x] !== 0){
@@ -682,7 +694,6 @@ function growCrops(){ // goes through the farm grid and changes all watered and 
 
 function moveCarrotToInventory(farmX, farmY){
   let placed = false;
-  console.log(farmX,farmY);
 
   //checks if there are any carrots already in inventory
   for(let y = 0; y < inventoryGrid.length;y++){
